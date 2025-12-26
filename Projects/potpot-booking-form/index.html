@@ -300,8 +300,7 @@
     }
 
     .booking-summary .row.location-row {
-      flex-direction: column;
-      gap: 4px;
+      display: block;
     }
 
     .booking-summary .label {
@@ -316,7 +315,13 @@
       word-break: break-word;
     }
 
+    .booking-summary .row.location-row .label {
+      display: block;
+      margin-bottom: 4px;
+    }
+
     .booking-summary .row.location-row .value {
+      display: block;
       text-align: left;
       font-size: 14px;
     }
@@ -437,8 +442,6 @@
           <strong>What's next?</strong><br>
           Our expert will visit at the scheduled time. First visit includes a free plant health check! 🌱
         </div>
-
-        <button class="btn btn-primary" onclick="window.location.reload()">Book Another Visit</button>
       </div>
     </div>
   </div>
