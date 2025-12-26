@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book Plant Care Visit | PotPot</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #f5f7f5 0%, #e8f5e9 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .logo {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+
+    .header h1 {
+      color: #2e7d32;
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .header p {
+      color: #666;
+      font-size: 14px;
+      margin-top: 4px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+
+    .step {
+      display: none;
+    }
+
+    .step.active {
+      display: block;
+    }
+
+    .step-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 16px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: #555;
+      margin-bottom: 6px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 12px 16px;
+      font-size: 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      transition: border-color 0.2s;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #4caf50;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 600;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: #4caf50;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #43a047;
+    }
+
+    .btn-primary:disabled {
+      background: #a5d6a7;
+      cursor: not-allowed;
+    }
+
+    .btn-secondary {
+      background: #f5f5f5;
+      color: #333;
+      margin-top: 8px;
+    }
+
+    .btn-secondary:hover {
+      background: #e0e0e0;
+    }
+
+    /* Address Input Styling */
+    .address-input-wrapper {
+      position: relative;
+    }
+
+    .address-input-wrapper input {
+      padding-left: 40px;
+    }
+
+    .address-input-wrapper .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #888;
+      font-size: 16px;
+    }
+
+    .selected-location {
+      background: #e8f5e9;
+      border: 2px solid #4caf50;
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+    }
+
+    .selected-location .location-text {
+      font-size: 14px;
+      color: #333;
+      margin-bottom: 4px;
+    }
+
+    .selected-location .pincode-badge {
+      display: inline-block;
+      background: #4caf50;
+      color: white;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    /* Date Selection */
+    .date-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .date-btn {
+      padding: 12px 8px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      background: white;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+
+    .date-btn:hover {
+      border-color: #4caf50;
+    }
+
+    .date-btn.selected {
+      border-color: #4caf50;
+      background: #e8f5e9;
+    }
+
+    .date-btn .day {
+      font-size: 12px;
+      color: #888;
+    }
+
+    .date-btn .date {
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    /* Time Selection */
+    .time-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .time-btn {
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      background: white;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .time-btn:hover {
+      border-color: #4caf50;
+    }
+
+    .time-btn.selected {
+      border-color: #4caf50;
+      background: #e8f5e9;
+    }
+
+    /* Loading */
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid #e0e0e0;
+      border-top-color: #4caf50;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Messages */
+    .message {
+      padding: 16px;
+      border-radius: 10px;
+      margin-bottom: 16px;
+    }
+
+    .message.info {
+      background: #e3f2fd;
+      color: #1565c0;
+    }
+
+    /* Success Screen */
+    .success-icon {
+      width: 80px;
+      height: 80px;
+      background: #e8f5e9;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      margin: 0 auto 16px;
+    }
+
+    .booking-summary {
+      background: #f5f5f5;
+      border-radius: 10px;
+      padding: 16px;
+      margin: 16px 0;
+    }
+
+    .booking-summary .row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #e0e0e0;
+      gap: 12px;
+    }
+
+    .booking-summary .row:last-child {
+      border-bottom: none;
+    }
+
+    .booking-summary .row.location-row {
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .booking-summary .label {
+      color: #666;
+      flex-shrink: 0;
+    }
+
+    .booking-summary .value {
+      font-weight: 500;
+      color: #333;
+      text-align: right;
+      word-break: break-word;
+    }
+
+    .booking-summary .row.location-row .value {
+      text-align: left;
+      font-size: 14px;
+    }
+
+    /* Progress */
+    .progress-bar {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .progress-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #e0e0e0;
+    }
+
+    .progress-dot.active {
+      background: #4caf50;
+    }
+
+    /* Google Places Autocomplete Dropdown Styling */
+    .pac-container {
+      border-radius: 10px;
+      border: 2px solid #e0e0e0;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      margin-top: 4px;
+    }
+
+    .pac-item {
+      padding: 10px 16px;
+      cursor: pointer;
+    }
+
+    .pac-item:hover {
+      background: #e8f5e9;
+    }
+
+    .pac-item-selected {
+      background: #e8f5e9;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="logo">🪴</div>
+      <h1>PotPot Plant Care</h1>
+      <p>Book your weekly plant maintenance visit</p>
+    </div>
+
+    <div class="card">
+      <div class="progress-bar">
+        <div class="progress-dot active" id="dot1"></div>
+        <div class="progress-dot" id="dot2"></div>
+        <div class="progress-dot" id="dot3"></div>
+      </div>
+
+      <!-- Step 1: Location Search -->
+      <div class="step active" id="step1">
+        <h2 class="step-title">Check availability in your area</h2>
+        <div class="form-group">
+          <label for="addressSearch">Search your address</label>
+          <div class="address-input-wrapper">
+            <span class="search-icon">📍</span>
+            <input type="text" id="addressSearch" placeholder="Start typing your address..." autocomplete="off">
+          </div>
+        </div>
+        <div id="selectedLocationBox" style="display: none;">
+          <div class="selected-location">
+            <div class="location-text" id="selectedAddress">-</div>
+            <span class="pincode-badge" id="selectedPincode">-</span>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="checkAvailability()" id="checkAvailabilityBtn" disabled>Check Availability</button>
+      </div>
+
+      <!-- Step 2: Select Date & Time -->
+      <div class="step" id="step2">
+        <div class="loading" id="slotsLoading">
+          <div class="spinner"></div>
+          <p>Finding available slots...</p>
+        </div>
+
+        <div id="slotsContent" style="display: none;">
+          <h2 class="step-title">Select a date</h2>
+          <div class="date-grid" id="dateGrid"></div>
+
+          <h2 class="step-title">Select a time</h2>
+          <div class="time-grid" id="timeGrid"></div>
+
+          <button class="btn btn-primary" onclick="submitBooking()" id="confirmBookingBtn" disabled>Confirm Booking</button>
+          <button class="btn btn-secondary" onclick="goToStep(1)">← Change Location</button>
+        </div>
+
+        <div id="noService" style="display: none;">
+          <div class="message info" style="text-align: center;">
+            <strong>Coming soon to your area!</strong><br>
+            We're expanding fast and will be available in your location soon.
+          </div>
+          <button class="btn btn-primary" onclick="goToStep(1)">← Try Another Location</button>
+        </div>
+      </div>
+
+      <!-- Step 3: Success -->
+      <div class="step" id="step3">
+        <div style="text-align: center;">
+          <div class="success-icon">✅</div>
+          <h2 class="step-title">Booking Confirmed!</h2>
+          <p style="color: #666; margin-bottom: 16px;">Your plant care visit has been scheduled.</p>
+        </div>
+
+        <div class="booking-summary" id="bookingSummary"></div>
+
+        <div class="message info">
+          <strong>What's next?</strong><br>
+          Our expert will visit at the scheduled time. First visit includes a free plant health check! 🌱
+        </div>
+
+        <button class="btn btn-primary" onclick="window.location.reload()">Book Another Visit</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Google Maps API -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDe963moD7w8fBZDDcGbrjJNJllhpknMy8&libraries=places&callback=initAutocomplete" async defer></script>
+
+  <script>
+    // ============================================
+    // CONFIGURATION
+    // ============================================
+    const API_URL = 'https://script.google.com/macros/s/AKfycbyA-NM5nP3jD7nujgRJUY74ftyTn3q8WQaTEKF2dtVnZ9KJ0ASdaz-fLt1GuRlphye0SQ/exec';
+
+    // ============================================
+    // STATE
+    // ============================================
+    let bookingData = {
+      pincode: '',
+      fullAddress: '',
+      gardenerID: '',
+      gardenerName: '',
+      date: '',
+      dateFormatted: '',
+      timeSlot: '',
+      availabilityRowIndex: null
+    };
+
+    let availableSlots = null;
+    let autocomplete = null;
+
+    // ============================================
+    // GOOGLE PLACES AUTOCOMPLETE
+    // ============================================
+    function initAutocomplete() {
+      const input = document.getElementById('addressSearch');
+      input.setAttribute('autocomplete', 'new-password');
+
+      autocomplete = new google.maps.places.Autocomplete(input, {
+        componentRestrictions: { country: 'in' },
+        fields: ['address_components', 'formatted_address', 'geometry', 'name']
+      });
+
+      autocomplete.addListener('place_changed', onPlaceSelected);
+
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') e.preventDefault();
+      });
+    }
+
+    function onPlaceSelected() {
+      const place = autocomplete.getPlace();
+
+      if (!place.address_components) {
+        alert('Please select an address from the dropdown');
+        return;
+      }
+
+      let pincode = '';
+      for (const component of place.address_components) {
+        if (component.types.includes('postal_code')) {
+          pincode = component.long_name;
+        }
+      }
+
+      if (!pincode) {
+        alert('Could not detect pincode. Please select a more specific address.');
+        return;
+      }
+
+      bookingData.pincode = pincode;
+      bookingData.fullAddress = place.formatted_address;
+
+      document.getElementById('selectedAddress').textContent = place.formatted_address;
+      document.getElementById('selectedPincode').textContent = 'Pincode: ' + pincode;
+      document.getElementById('selectedLocationBox').style.display = 'block';
+      document.getElementById('checkAvailabilityBtn').disabled = false;
+    }
+
+    // ============================================
+    // STEP NAVIGATION
+    // ============================================
+    function goToStep(step) {
+      document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+      document.getElementById(`step${step}`).classList.add('active');
+
+      document.querySelectorAll('.progress-dot').forEach((dot, i) => {
+        dot.classList.toggle('active', i < step);
+      });
+    }
+
+    // ============================================
+    // STEP 1: CHECK AVAILABILITY
+    // ============================================
+    async function checkAvailability() {
+      const pincode = bookingData.pincode;
+
+      if (!pincode) {
+        alert('Please select an address first');
+        return;
+      }
+
+      goToStep(2);
+
+      document.getElementById('slotsLoading').style.display = 'block';
+      document.getElementById('slotsContent').style.display = 'none';
+      document.getElementById('noService').style.display = 'none';
+
+      try {
+        const response = await fetch(`${API_URL}?pincode=${pincode}`);
+        const data = await response.json();
+
+        document.getElementById('slotsLoading').style.display = 'none';
+
+        if (data.success && data.slots.available) {
+          availableSlots = data.slots;
+          bookingData.gardenerID = data.slots.gardenerID;
+          bookingData.gardenerName = data.slots.gardenerName;
+
+          renderDateGrid(data.slots.dates);
+          document.getElementById('slotsContent').style.display = 'block';
+        } else {
+          document.getElementById('noService').style.display = 'block';
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Something went wrong. Please try again.');
+        goToStep(1);
+      }
+    }
+
+    // ============================================
+    // STEP 2: DATE & TIME SELECTION
+    // ============================================
+    function renderDateGrid(dates) {
+      const grid = document.getElementById('dateGrid');
+      grid.innerHTML = '';
+
+      dates.forEach(d => {
+        const parts = d.dateFormatted.split(', ');
+        const btn = document.createElement('button');
+        btn.className = 'date-btn';
+        btn.innerHTML = `<div class="day">${parts[0]}</div><div class="date">${parts[1]}</div>`;
+        btn.onclick = () => selectDate(d, btn);
+        grid.appendChild(btn);
+      });
+    }
+
+    function selectDate(dateObj, btn) {
+      document.querySelectorAll('.date-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+
+      bookingData.date = dateObj.date;
+      bookingData.dateFormatted = dateObj.dateFormatted;
+
+      renderTimeGrid(dateObj.times);
+      bookingData.timeSlot = '';
+      bookingData.availabilityRowIndex = null;
+      document.getElementById('confirmBookingBtn').disabled = true;
+    }
+
+    function renderTimeGrid(times) {
+      const grid = document.getElementById('timeGrid');
+      grid.innerHTML = '';
+
+      times.forEach(t => {
+        const btn = document.createElement('button');
+        btn.className = 'time-btn';
+        btn.textContent = t.time;
+        btn.onclick = () => selectTime(t, btn);
+        grid.appendChild(btn);
+      });
+    }
+
+    function selectTime(timeObj, btn) {
+      document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+
+      bookingData.timeSlot = timeObj.time;
+      bookingData.availabilityRowIndex = timeObj.rowIndex;
+      document.getElementById('confirmBookingBtn').disabled = false;
+    }
+
+    // ============================================
+    // SUBMIT BOOKING
+    // ============================================
+    async function submitBooking() {
+      const payload = {
+        ...bookingData,
+        customerName: 'Customer',
+        phone: '9999999999',
+        address: bookingData.fullAddress,
+        plantCount: '1-10',
+        notes: ''
+      };
+
+      // Disable button while processing
+      const btn = document.getElementById('confirmBookingBtn');
+      btn.disabled = true;
+      btn.textContent = 'Booking...';
+
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          showSuccess(result.booking);
+        } else {
+          alert(result.error || 'Booking failed. Please try again.');
+          btn.disabled = false;
+          btn.textContent = 'Confirm Booking';
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Something went wrong. Please try again.');
+        btn.disabled = false;
+        btn.textContent = 'Confirm Booking';
+      }
+    }
+
+    function showSuccess(booking) {
+      document.getElementById('bookingSummary').innerHTML = `
+        <div class="row">
+          <span class="label">Booking ID</span>
+          <span class="value">${booking.bookingID}</span>
+        </div>
+        <div class="row">
+          <span class="label">Date</span>
+          <span class="value">${bookingData.dateFormatted}</span>
+        </div>
+        <div class="row">
+          <span class="label">Time</span>
+          <span class="value">${bookingData.timeSlot}</span>
+        </div>
+        <div class="row location-row">
+          <span class="label">Location</span>
+          <span class="value">${bookingData.fullAddress}</span>
+        </div>
+      `;
+
+      goToStep(3);
+    }
+  </script>
+</body>
+</html>
