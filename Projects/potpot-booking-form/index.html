@@ -256,10 +256,6 @@
             color: white;
         }
 
-        .calendar-day.today {
-            border: 2px solid #4caf50;
-        }
-
         .calendar-day:disabled {
             color: #ccc;
             cursor: not-allowed;
@@ -531,7 +527,7 @@
                     <h2 class="step-title">Select a date</h2>
                     <div id="calendarContainer" class="calendar-container"></div>
 
-                    <h2 class="step-title">Select a time</h2>
+                    <h2 id="timeSection" class="step-title">Select a time</h2>
                     <div id="timeGrid" class="time-grid"></div>
 
                     <button id="confirmBookingBtn" class="btn btn-primary" onclick="submitBooking()" disabled>Confirm Booking</button>
@@ -869,7 +865,6 @@
 
                 let classes = 'calendar-day';
                 if (isSelected) classes += ' selected';
-                if (isToday) classes += ' today';
                 if (hasSlots) classes += ' has-slots';
 
                 const isDisabled = isPast || !hasSlots;
@@ -921,6 +916,11 @@
 
             renderCalendar();
             renderTimeGrid(dateObj.times);
+
+            // Smooth scroll to time section
+            setTimeout(() => {
+                document.getElementById('timeSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
         }
 
         function renderTimeGrid(times) {
