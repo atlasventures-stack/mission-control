@@ -474,14 +474,16 @@
                     <div class="pincode-badge" id="selectedPincode">-</div>
                 </div>
 
-                <div class="form-group">
-                    <label for="houseNumber">House / Flat Number</label>
-                    <input type="text" id="houseNumber" placeholder="e.g. 101, A-502">
-                </div>
+                <div id="addressDetailsFields" style="display: none;">
+                    <div class="form-group">
+                        <label for="houseNumber">House / Flat Number</label>
+                        <input type="text" id="houseNumber" placeholder="e.g. 101, A-502">
+                    </div>
 
-                <div class="form-group">
-                    <label for="buildingName">Building / Apartment Name (Optional)</label>
-                    <input type="text" id="buildingName" placeholder="e.g. Prestige Towers">
+                    <div class="form-group">
+                        <label for="buildingName">Building / Apartment Name (Optional)</label>
+                        <input type="text" id="buildingName" placeholder="e.g. Prestige Towers">
+                    </div>
                 </div>
 
                 <button class="btn btn-primary" onclick="goToStep(2)">Continue</button>
@@ -644,6 +646,7 @@
 
             input.addEventListener('input', () => {
                 document.getElementById('selectedLocationBox').style.display = 'none';
+                document.getElementById('addressDetailsFields').style.display = 'none';
                 document.getElementById('houseNumber').value = '';
                 document.getElementById('buildingName').value = '';
                 bookingData.pincode = '';
@@ -698,6 +701,7 @@
             document.getElementById('selectedAddress').textContent = formattedAddress;
             document.getElementById('selectedPincode').textContent = 'Pincode: ' + pincode;
             document.getElementById('selectedLocationBox').style.display = 'block';
+            document.getElementById('addressDetailsFields').style.display = 'block';
         }
 
         function goToStep(step) {
