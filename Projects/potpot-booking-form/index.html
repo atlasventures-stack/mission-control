@@ -571,6 +571,8 @@
             pincode: '',
             fullAddress: '',
             mapLink: '',
+            lat: null,
+            lng: null,
             gardenerID: '',
             gardenerName: '',
             customerName: '',
@@ -692,6 +694,8 @@
             bookingData.pincode = pincode;
             bookingData.fullAddress = formattedAddress;
             bookingData.mapLink = `https://www.google.com/maps?q=${lat},${lng}`;
+            bookingData.lat = lat;
+            bookingData.lng = lng;
 
             document.getElementById('selectedAddress').textContent = formattedAddress;
             document.getElementById('selectedPincode').textContent = 'Pincode: ' + pincode;
@@ -751,7 +755,7 @@
             document.getElementById('noService').style.display = 'none';
 
             try {
-                const response = await fetch(`${API_URL}?pincode=${pincode}`);
+                const response = await fetch(`${API_URL}?pincode=${pincode}&lat=${bookingData.lat}&lng=${bookingData.lng}`);
                 const data = await response.json();
 
                 document.getElementById('slotsLoading').style.display = 'none';
