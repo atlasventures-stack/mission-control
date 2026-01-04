@@ -1,0 +1,15 @@
+{
+  "redirects": [
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "potpot-booking-form.vercel.app"
+        }
+      ],
+      "destination": "/booking.html",
+      "permanent": false
+    }
+  ]
+}
