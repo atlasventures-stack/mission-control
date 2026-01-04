@@ -431,41 +431,71 @@
 
             </div>
 
+            <!-- Floating WhatsApp Button -->
+            <button
+                id="floatingWhatsApp"
+                onclick="openWhatsApp()"
+                class="fixed bottom-28 right-5 z-40 bg-white text-[#25D366] shadow-xl shadow-black/5 border border-green-100/50 p-3.5 rounded-full flex items-center justify-center transition-transform active:scale-95"
+                aria-label="Chat on WhatsApp"
+            >
+                <svg class="w-7 h-7" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.008-.57-.008-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.304-5.266c0-5.443 4.429-9.876 9.88-9.876 2.64 0 5.122 1.03 6.988 2.896a9.825 9.825 0 012.893 6.991c-.003 5.444-4.432 9.877-9.883 9.877"/>
+                </svg>
+            </button>
+
             <!-- Sticky Footer CTA -->
             <div class="absolute bottom-0 left-0 right-0 z-50">
                 <div class="relative w-full shrink-0">
+
+                    <!-- Plant Selector Drawer -->
+                    <div id="plantSelectorDrawer" class="hidden absolute bottom-[calc(100%-10px)] left-0 w-full bg-white rounded-t-2xl shadow-2xl p-5 z-20 border-t border-earth-100">
+                        <div class="flex justify-between items-center mb-4 px-1">
+                            <span class="text-xs font-bold text-earth-500 uppercase tracking-widest">Select Number of Plants</span>
+                            <button onclick="closePlantSelector()" class="bg-earth-50 text-earth-400 p-1.5 rounded-full hover:bg-earth-100">
+                                <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="m18 15-6-6-6 6"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3" id="plantTierGrid"></div>
+                    </div>
+
+                    <!-- Backdrop for drawer -->
+                    <div id="selectorBackdrop" class="hidden fixed inset-0 bg-black/40 z-10" onclick="closePlantSelector()"></div>
+
                     <!-- Gradient fade -->
                     <div class="absolute -top-6 left-0 right-0 h-6 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
 
-                    <div class="px-5 pb-5 pt-2 bg-white">
-                        <div class="flex flex-col gap-2.5">
+                    <div class="px-5 pb-5 pt-2 bg-white relative z-30 shadow-[0_-5px_20px_-5px_rgba(0,0,0,0.05)] border-t border-earth-50">
+                        <div class="flex flex-col gap-2">
+
+                            <!-- Plant Selection & Price Display -->
+                            <button
+                                onclick="togglePlantSelector()"
+                                class="w-full flex items-center justify-between bg-earth-50/50 border border-earth-100 py-2 px-4 rounded-lg active:bg-earth-100 transition-colors"
+                            >
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs font-bold text-earth-500 uppercase tracking-wide">Plants:</span>
+                                    <div class="flex items-center gap-1 bg-white px-2 py-0.5 rounded border border-earth-100 shadow-sm">
+                                        <span id="selectedPlantRange" class="text-sm font-bold text-earth-900">0-20</span>
+                                        <svg class="w-3 h-3 text-earth-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="m6 9 6 6 6-6"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <span id="selectedPrice" class="text-lg font-bold text-earth-900">₹499</span>
+                            </button>
 
                             <!-- Primary Booking Button -->
                             <a
                                 href="index.html"
-                                onclick="trackEvent('click_book_visit', {page: 'home'})"
-                                class="w-full bg-earth-800 text-white font-bold text-base py-3 rounded-xl shadow-lg shadow-earth-900/10 hover:bg-earth-900 hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 flex items-center justify-center gap-2 group no-underline"
+                                onclick="trackEvent('click_book_visit', {page: 'home', plants: selectedTier.label, price: selectedTier.value})"
+                                class="w-full bg-earth-800 text-white py-3 rounded-xl shadow-lg shadow-earth-900/10 hover:bg-earth-900 active:scale-[0.99] transition-all flex flex-col items-center justify-center gap-0.5 no-underline"
                             >
-                                <span>Book your first visit</span>
-                                <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
-                                </svg>
+                                <span class="font-bold text-base">Book your first visit</span>
+                                <span class="text-[10px] font-medium text-earth-200 uppercase tracking-wide opacity-90">No pre-payment needed</span>
                             </a>
 
-                            <!-- Secondary WhatsApp Button -->
-                            <button
-                                onclick="openWhatsApp()"
-                                class="w-full bg-white border border-earth-200 text-earth-700 font-semibold text-sm py-2.5 rounded-xl hover:bg-earth-50 active:scale-[0.99] transition-all duration-200 flex items-center justify-center gap-2"
-                            >
-                                <svg class="w-4 h-4 text-[#25D366]" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.008-.57-.008-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.304-5.266c0-5.443 4.429-9.876 9.88-9.876 2.64 0 5.122 1.03 6.988 2.896a9.825 9.825 0 012.893 6.991c-.003 5.444-4.432 9.877-9.883 9.877"/>
-                                </svg>
-                                <span>Book on WhatsApp</span>
-                            </button>
-
-                            <p class="text-center text-[11px] text-blue-900 font-medium tracking-wide mt-1 uppercase">
-                                No payment required now • Pay after service
-                            </p>
                         </div>
                     </div>
                 </div>
@@ -521,6 +551,64 @@
     </div>
 
     <script>
+        // Pricing tiers
+        const pricingTiers = [
+            { label: "0-20", value: 499 },
+            { label: "20-35", value: 749 },
+            { label: "35-50", value: 999 },
+            { label: "50-75", value: 1249 },
+            { label: "75-100", value: 1499 },
+            { label: "100+", value: 1999 },
+        ];
+        let selectedTier = pricingTiers[0];
+
+        // Initialize plant selector grid
+        function initPlantSelector() {
+            const grid = document.getElementById('plantTierGrid');
+            grid.innerHTML = pricingTiers.map(tier => `
+                <button
+                    onclick="selectTier('${tier.label}')"
+                    class="tier-btn flex items-center justify-between px-4 py-3 rounded-xl border transition-all ${
+                        selectedTier.label === tier.label
+                        ? 'bg-earth-800 text-white border-earth-800 shadow-md'
+                        : 'bg-white text-earth-600 border-earth-200 hover:border-earth-300 hover:bg-earth-50'
+                    }"
+                    data-tier="${tier.label}"
+                >
+                    <span class="text-sm font-bold">${tier.label} Plants</span>
+                    <span class="text-sm font-medium ${selectedTier.label === tier.label ? 'text-earth-200' : 'text-earth-600'}">₹${tier.value}</span>
+                </button>
+            `).join('');
+        }
+
+        function selectTier(label) {
+            selectedTier = pricingTiers.find(t => t.label === label);
+            document.getElementById('selectedPlantRange').textContent = selectedTier.label;
+            document.getElementById('selectedPrice').textContent = '₹' + selectedTier.value;
+            initPlantSelector(); // Re-render to update selection
+            closePlantSelector();
+        }
+
+        function togglePlantSelector() {
+            const drawer = document.getElementById('plantSelectorDrawer');
+            const backdrop = document.getElementById('selectorBackdrop');
+            const whatsappBtn = document.getElementById('floatingWhatsApp');
+
+            if (drawer.classList.contains('hidden')) {
+                drawer.classList.remove('hidden');
+                backdrop.classList.remove('hidden');
+                whatsappBtn.classList.add('hidden');
+            } else {
+                closePlantSelector();
+            }
+        }
+
+        function closePlantSelector() {
+            document.getElementById('plantSelectorDrawer').classList.add('hidden');
+            document.getElementById('selectorBackdrop').classList.add('hidden');
+            document.getElementById('floatingWhatsApp').classList.remove('hidden');
+        }
+
         function openModal() {
             const modal = document.getElementById('bookingModal');
             modal.classList.remove('hidden');
@@ -544,6 +632,9 @@
             window.open(`https://wa.me/919187446496?text=${encodeURIComponent(text)}`, '_blank');
             closeModal();
         }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', initPlantSelector);
     </script>
 </body>
 </html>
