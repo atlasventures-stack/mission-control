@@ -866,7 +866,9 @@
             }
 
             bookingData.customerName = customerName;
-            bookingData.phone = customerPhone;
+            // Add 91 prefix for WATI - remove any existing prefix first
+            let cleanPhone = customerPhone.replace(/^(\+91|91|0)/, '');
+            bookingData.phone = '91' + cleanPhone;
             bookingData.plantCount = plantCount;
 
             const houseNumber = document.getElementById('houseNumber').value.trim();
