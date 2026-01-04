@@ -30,11 +30,15 @@
         // Track events
         function trackEvent(eventName, params = {}) {
             gtag('event', eventName, params);
+            // Also send to Meta Pixel
+            if (typeof fbq !== 'undefined') {
+                fbq('trackCustom', eventName, params);
+            }
         }
 
-        // Track booking page load
+        // Track home page load
         window.addEventListener('load', function() {
-            trackEvent('booking_page_load');
+            trackEvent('landed_home');
         });
     </script>
     <!-- End Google Analytics -->
@@ -44,1141 +48,626 @@
     <!-- End Vercel Web Analytics -->
 
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Book Plant Care Visit | PotPot</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #f5f7f5 0%, #e8f5e9 100%);
-            min-height: 100vh;
-            padding: 12px;
-        }
-
-        .container {
-            max-width: 480px;
-            margin: 0 auto;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 16px;
-        }
-
-        .logo {
-            font-size: 28px;
-            margin-bottom: 4px;
-        }
-
-        .header h1 {
-            color: #2e7d32;
-            font-size: 24px;
-            font-weight: 600;
-        }
-
-        .header p {
-            color: #666;
-            font-size: 14px;
-            margin-top: 4px;
-        }
-
-        .card {
-            background: white;
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-        }
-
-        .step {
-            display: none;
-        }
-
-        .step.active {
-            display: block;
-        }
-
-        .step-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 16px;
-        }
-
-        .form-group {
-            margin-bottom: 16px;
-        }
-
-        label {
-            display: block;
-            font-size: 14px;
-            font-weight: 500;
-            color: #555;
-            margin-bottom: 6px;
-        }
-
-        input, select, textarea {
-            width: 100%;
-            padding: 12px 16px;
-            font-size: 16px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            transition: border-color 0.2s;
-        }
-
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: #4caf50;
-        }
-
-        .btn {
-            width: 100%;
-            padding: 14px;
-            font-size: 16px;
-            font-weight: 600;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-primary {
-            background: #4caf50;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #43a047;
-        }
-
-        .btn-primary:disabled {
-            background: #a5d6a7;
-            cursor: not-allowed;
-        }
-
-        .btn-secondary {
-            background: #f5f5f5;
-            color: #333;
-            margin-top: 8px;
-        }
-
-        .btn-secondary:hover {
-            background: #e0e0e0;
-        }
-
-        .address-input-wrapper {
-            position: relative;
-        }
-
-        .address-input-wrapper input {
-            padding-left: 40px;
-        }
-
-        .address-input-wrapper .search-icon {
-            position: absolute;
-            left: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #888;
-            font-size: 16px;
-        }
-
-        .selected-location {
-            background: #e8f5e9;
-            border: 2px solid #4caf50;
-            border-radius: 10px;
-            padding: 12px 16px;
-            margin-bottom: 16px;
-        }
-
-        .selected-location .location-text {
-            font-size: 14px;
-            color: #333;
-            margin-bottom: 4px;
-        }
-
-        .selected-location .pincode-badge {
-            display: inline-block;
-            background: #4caf50;
-            color: white;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .calendar-container {
-            margin-bottom: 16px;
-        }
-
-        .calendar-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-
-        .calendar-header .month-year {
-            font-size: 16px;
-            font-weight: 600;
-            color: #333;
-        }
-
-        .calendar-nav {
-            display: flex;
-            gap: 8px;
-        }
-
-        .calendar-nav button {
-            width: 36px;
-            height: 36px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            background: white;
-            cursor: pointer;
-            font-size: 16px;
-            color: #555;
-            transition: all 0.2s;
-        }
-
-        .calendar-nav button:hover:not(:disabled) {
-            border-color: #4caf50;
-            color: #4caf50;
-        }
-
-        .calendar-nav button:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-        }
-
-        .calendar-weekdays {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 4px;
-            margin-bottom: 8px;
-        }
-
-        .calendar-weekdays span {
-            text-align: center;
-            font-size: 11px;
-            font-weight: 600;
-            color: #888;
-            padding: 8px 0;
-        }
-
-        .calendar-days {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 4px;
-        }
-
-        .calendar-day {
-            aspect-ratio: 1;
-            border: none;
-            border-radius: 8px;
-            background: #f5f5f5;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            color: #333;
-            transition: all 0.2s;
-            position: relative;
-        }
-
-        .calendar-day:hover:not(:disabled):not(.empty) {
-            background: #e8f5e9;
-        }
-
-        .calendar-day.selected {
-            background: #4caf50;
-            color: white;
-        }
-
-        .calendar-day:disabled {
-            color: #ccc;
-            cursor: not-allowed;
-            background: #fafafa;
-        }
-
-        .calendar-day.empty {
-            background: transparent;
-            cursor: default;
-        }
-
-        .calendar-day.has-slots::after {
-            content: '';
-            position: absolute;
-            bottom: 6px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 4px;
-            height: 4px;
-            background: #4caf50;
-            border-radius: 50%;
-        }
-
-        .calendar-day.selected.has-slots::after {
-            background: white;
-        }
-
-        .time-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 8px;
-        }
-
-        .time-btn {
-            padding: 14px 16px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            background: white;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.2s;
-            white-space: nowrap;
-            text-align: center;
-        }
-
-        .time-btn:hover {
-            border-color: #4caf50;
-        }
-
-        .time-btn.selected {
-            border-color: #4caf50;
-            background: #e8f5e9;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #666;
-        }
-
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid #e0e0e0;
-            border-top-color: #4caf50;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin: 0 auto 16px;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PotPot | Urban Plant Care</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        earth: {
+                            50: '#f4f7f4',
+                            100: '#e3ebe3',
+                            200: '#c5d9c5',
+                            300: '#9aba9a',
+                            400: '#6b9c6b',
+                            500: '#4a824a',
+                            600: '#386638',
+                            700: '#2d522d',
+                            800: '#264226',
+                            900: '#1f361f',
+                            950: '#0f1d0f',
+                        }
+                    }
+                }
             }
         }
-
-        .message {
-            padding: 16px;
-            border-radius: 10px;
-            margin-bottom: 16px;
+    </script>
+    <style>
+        /* Hide scrollbar for clean mobile look */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
         }
-
-        .message.info {
-            background: #e3f2fd;
-            color: #1565c0;
-        }
-
-        .success-icon {
-            width: 80px;
-            height: 80px;
-            background: #e8f5e9;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 40px;
-            margin: 0 auto 16px;
-        }
-
-        .booking-summary {
-            background: #f5f5f5;
-            border-radius: 10px;
-            padding: 16px;
-            margin: 16px 0;
-        }
-
-        .booking-summary .row {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid #e0e0e0;
-            gap: 12px;
-        }
-
-        .booking-summary .row:last-child {
-            border-bottom: none;
-        }
-
-        .booking-summary .row.location-row {
-            display: block;
-        }
-
-        .booking-summary .label {
-            color: #666;
-            flex-shrink: 0;
-        }
-
-        .booking-summary .value {
-            font-weight: 500;
-            color: #333;
-            text-align: right;
-            word-break: break-word;
-        }
-
-        .booking-summary .row.location-row .label {
-            display: block;
-            margin-bottom: 4px;
-        }
-
-        .booking-summary .row.location-row .value {
-            display: block;
-            text-align: left;
-            font-size: 14px;
-        }
-
-        #mapContainer {
-            margin: 16px 0;
-        }
-
-        #map {
-            width: 100%;
-            height: 200px;
-            border-radius: 10px;
-            border: 2px solid #e0e0e0;
-        }
-
-        .map-hint {
-            text-align: center;
-            font-size: 12px;
-            color: #888;
-            margin-top: 8px;
-        }
-
-        .pac-container {
-            border-radius: 10px;
-            border: 2px solid #e0e0e0;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            margin-top: 4px;
-        }
-
-        .pac-item {
-            padding: 10px 16px;
-            cursor: pointer;
-        }
-
-        .pac-item:hover {
-            background: #e8f5e9;
-        }
-
-        .pac-item-selected {
-            background: #e8f5e9;
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <div class="header">
-            <div class="logo">🪴</div>
-            <h1>PotPot Plant Care</h1>
-        </div>
+<body class="bg-gray-50 text-gray-900 antialiased font-sans">
 
-        <div class="card">
-            <!-- Step 1: Address Selection -->
-            <div id="step1" class="step active">
-                <div id="step1Content">
-                    <h2 class="step-title">Search your address</h2>
+    <!-- Outer container: centered on desktop to mimic mobile view -->
+    <div class="h-[100dvh] bg-stone-100 flex justify-center overflow-hidden">
+        <div class="w-full md:max-w-md bg-white h-full shadow-2xl relative flex flex-col">
 
-                    <div class="form-group">
-                        <label for="addressSearch">Your location</label>
-                        <div class="address-input-wrapper">
-                            <span class="search-icon">📍</span>
-                            <input type="text" id="addressSearch" placeholder="Search your address">
+            <!-- Main Scrollable Container -->
+            <div class="flex-1 overflow-y-auto no-scrollbar scroll-smooth relative bg-white">
+
+                <!-- Top Section: Video/Image Container -->
+                <div class="w-full px-4 pt-5 pb-0 flex flex-col items-center justify-center bg-white">
+                    <div class="w-full aspect-video rounded-[24px] overflow-hidden shadow-lg shadow-earth-900/5 relative transform translate-z-0 bg-earth-100 ring-1 ring-earth-900/5">
+                        <!-- Hero Video -->
+                        <div class="relative w-full h-full bg-earth-100 overflow-hidden group">
+                            <div class="absolute inset-0 w-full h-full">
+                                <video
+                                    src="video.mp4"
+                                    class="w-full h-full object-cover opacity-90 transition-transform duration-700 group-hover:scale-105"
+                                    autoplay
+                                    loop
+                                    muted
+                                    playsinline
+                                ></video>
+                            </div>
+
+                            <!-- Gradient Overlay -->
+                            <div class="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/30 pointer-events-none"></div>
+
+                            <!-- Brand Tag -->
+                            <div class="absolute top-4 left-4 z-10 pointer-events-none">
+                                <div class="flex items-center gap-1.5 bg-black/30 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20">
+                                    <svg class="w-3 h-3 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M7 20h10"/>
+                                        <path d="M10 20c5.5-2.5.8-6.4 3-10"/>
+                                        <path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z"/>
+                                        <path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z"/>
+                                    </svg>
+                                    <span class="text-white text-[10px] font-bold tracking-widest uppercase">PotPot</span>
+                                </div>
+                            </div>
                         </div>
-                        <div id="mapContainer">
-                            <div id="map"></div>
-                            <p class="map-hint">Drag the pin to adjust your exact location</p>
+                    </div>
+                </div>
+
+                <!-- Content Section -->
+                <div class="pb-36">
+                    <div class="flex flex-col bg-white">
+
+                        <!-- Main Content Container -->
+                        <div class="px-6 py-5 flex flex-col gap-6">
+
+                            <!-- Headline -->
+                            <div class="shrink-0 text-center px-2">
+                                <h1 class="font-serif font-bold text-earth-800 mb-1 leading-tight tracking-tight whitespace-nowrap" style="font-size: clamp(1.35rem, 5.5vw, 1.7rem);">
+                                    Get Your Plants Growing Again
+                                </h1>
+                            </div>
+
+                            <!-- Service Includes -->
+                            <div>
+                                <h3 class="text-center text-xs font-bold text-earth-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-4 opacity-80">
+                                    <span class="h-px bg-earth-100 flex-1"></span>
+                                    Service Includes
+                                    <span class="h-px bg-earth-100 flex-1"></span>
+                                </h3>
+
+                                <div class="shrink-0 grid grid-cols-4 gap-2 sm:gap-4">
+                                    <!-- Prune -->
+                                    <div class="flex flex-col items-center gap-2 select-none">
+                                        <div class="relative">
+                                            <div class="w-12 h-12 rounded-full bg-earth-50 flex items-center justify-center text-earth-700 ring-1 ring-earth-100">
+                                                <svg class="w-[22px] h-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                                    <circle cx="6" cy="6" r="3"/><path d="M8.12 8.12 12 12"/><path d="M20 4 8.12 15.88"/><circle cx="6" cy="18" r="3"/><path d="M14.8 14.8 20 20"/>
+                                                </svg>
+                                            </div>
+                                            <div class="absolute -top-1 -right-1 bg-earth-600 text-white rounded-full p-0.5 ring-2 ring-white">
+                                                <svg class="w-[10px] h-[10px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                                            </div>
+                                        </div>
+                                        <span class="text-[11px] font-bold text-earth-500 uppercase tracking-wide">Prune</span>
+                                    </div>
+                                    <!-- Pest -->
+                                    <div class="flex flex-col items-center gap-2 select-none">
+                                        <div class="relative">
+                                            <div class="w-12 h-12 rounded-full bg-earth-50 flex items-center justify-center text-earth-700 ring-1 ring-earth-100">
+                                                <svg class="w-[22px] h-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"/><path d="M8 15v1a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6v-4"/><circle cx="20" cy="10" r="2"/>
+                                                </svg>
+                                            </div>
+                                            <div class="absolute -top-1 -right-1 bg-earth-600 text-white rounded-full p-0.5 ring-2 ring-white">
+                                                <svg class="w-[10px] h-[10px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                                            </div>
+                                        </div>
+                                        <span class="text-[11px] font-bold text-earth-500 uppercase tracking-wide">Pest</span>
+                                    </div>
+                                    <!-- Nutrient -->
+                                    <div class="flex flex-col items-center gap-2 select-none">
+                                        <div class="relative">
+                                            <div class="w-12 h-12 rounded-full bg-earth-50 flex items-center justify-center text-earth-700 ring-1 ring-earth-100">
+                                                <svg class="w-[22px] h-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S7.29 6.75 7 5.3c-.29 1.45-1.14 2.84-2.29 3.76S3 11.1 3 12.25c0 2.22 1.8 4.05 4 4.05z"/><path d="M12.56 14.69c1.16 0 2.1-.96 2.1-2.13 0-.61-.3-1.19-.9-1.68-.6-.49-1.07-1.1-1.2-1.88-.13.77-.6 1.4-1.2 1.88-.6.49-.9 1.07-.9 1.68 0 1.17.94 2.13 2.1 2.13Z"/><path d="M17 20c-3.37 0-6.5-1.5-8.5-4h17c-2 2.5-5.13 4-8.5 4Z"/>
+                                                </svg>
+                                            </div>
+                                            <div class="absolute -top-1 -right-1 bg-earth-600 text-white rounded-full p-0.5 ring-2 ring-white">
+                                                <svg class="w-[10px] h-[10px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                                            </div>
+                                        </div>
+                                        <span class="text-[11px] font-bold text-earth-500 uppercase tracking-wide">Nutrient</span>
+                                    </div>
+                                    <!-- Repot -->
+                                    <div class="flex flex-col items-center gap-2 select-none">
+                                        <div class="relative">
+                                            <div class="w-12 h-12 rounded-full bg-earth-50 flex items-center justify-center text-earth-700 ring-1 ring-earth-100">
+                                                <svg class="w-[22px] h-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/>
+                                                </svg>
+                                            </div>
+                                            <div class="absolute -top-1 -right-1 bg-earth-600 text-white rounded-full p-0.5 ring-2 ring-white">
+                                                <svg class="w-[10px] h-[10px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                                            </div>
+                                        </div>
+                                        <span class="text-[11px] font-bold text-earth-500 uppercase tracking-wide">Repot</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Monthly Subscription Benefits - Boxed Design -->
+                            <div class="mt-2">
+                                <div class="rounded-2xl bg-[#eff6ef] border border-earth-200 p-5 relative overflow-hidden shadow-sm">
+                                    <!-- Background Decoration -->
+                                    <div class="absolute -top-6 -right-6 w-24 h-24 bg-earth-200/40 rounded-full blur-2xl pointer-events-none"></div>
+
+                                    <div class="flex items-center gap-2.5 mb-4 relative z-10">
+                                        <span class="bg-earth-700 text-white p-1.5 rounded-lg shadow-sm">
+                                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/>
+                                            </svg>
+                                        </span>
+                                        <h3 class="font-serif font-bold text-earth-900 text-lg leading-tight">Monthly Subscription Benefits</h3>
+                                    </div>
+
+                                    <div class="flex flex-col gap-2.5 relative z-10">
+                                        <!-- Benefit 1 -->
+                                        <div class="flex items-start gap-3 bg-white p-3 rounded-xl border border-earth-100 shadow-sm">
+                                            <div class="mt-0.5 w-5 h-5 rounded-full bg-earth-50 flex items-center justify-center text-earth-600 shrink-0">
+                                                <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                                            </div>
+                                            <div class="flex flex-col">
+                                                <span class="font-bold text-earth-900 text-sm leading-tight">Complete care & treatment service</span>
+                                                <span class="text-xs text-earth-500 mt-0.5 font-medium">1 visit per month</span>
+                                            </div>
+                                        </div>
+                                        <!-- Benefit 2 -->
+                                        <div class="flex items-start gap-3 bg-white p-3 rounded-xl border border-earth-100 shadow-sm">
+                                            <div class="mt-0.5 w-5 h-5 rounded-full bg-earth-50 flex items-center justify-center text-earth-600 shrink-0">
+                                                <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                                            </div>
+                                            <div class="flex flex-col">
+                                                <span class="font-bold text-earth-900 text-sm leading-tight">High-quality materials included</span>
+                                                <span class="text-xs text-earth-500 mt-0.5 font-medium">No extra cost</span>
+                                            </div>
+                                        </div>
+                                        <!-- Benefit 3 -->
+                                        <div class="flex items-start gap-3 bg-white p-3 rounded-xl border border-earth-100 shadow-sm">
+                                            <div class="mt-0.5 w-5 h-5 rounded-full bg-earth-50 flex items-center justify-center text-earth-600 shrink-0">
+                                                <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                                            </div>
+                                            <div class="flex flex-col">
+                                                <span class="font-bold text-earth-900 text-sm leading-tight">Free check-up after the service</span>
+                                                <span class="text-xs text-earth-500 mt-0.5 font-medium">Any day of the month</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pricing Section -->
+                        <div class="py-8 bg-white border-t border-earth-100">
+                            <div class="px-6 flex items-baseline justify-between mb-5">
+                                <h2 class="text-lg font-serif font-bold text-earth-950">Pricing details</h2>
+                                <span class="text-xs font-bold text-earth-400 uppercase tracking-wider animate-pulse">Swipe →</span>
+                            </div>
+
+                            <!-- Horizontal Scroll Container -->
+                            <div class="flex overflow-x-auto gap-4 px-6 pb-4 snap-x mandatory no-scrollbar">
+                                <!-- 0-20 -->
+                                <div class="shrink-0 snap-center w-[130px] flex flex-col items-center justify-between p-4 rounded-2xl border border-earth-100 bg-earth-50/30">
+                                    <div class="text-center mb-3">
+                                        <span class="block font-bold text-earth-900 text-xl leading-none mb-1.5">0-20</span>
+                                        <span class="text-xs text-earth-500 uppercase font-bold tracking-wider">Plants</span>
+                                    </div>
+                                    <div class="w-full rounded-lg py-1.5 text-center bg-white border border-earth-100/50 shadow-sm">
+                                        <span class="text-sm font-bold text-earth-700">₹499/mo</span>
+                                    </div>
+                                </div>
+                                <!-- 20-35 -->
+                                <div class="shrink-0 snap-center w-[130px] flex flex-col items-center justify-between p-4 rounded-2xl border border-earth-100 bg-earth-50/30">
+                                    <div class="text-center mb-3">
+                                        <span class="block font-bold text-earth-900 text-xl leading-none mb-1.5">20-35</span>
+                                        <span class="text-xs text-earth-500 uppercase font-bold tracking-wider">Plants</span>
+                                    </div>
+                                    <div class="w-full rounded-lg py-1.5 text-center bg-white border border-earth-100/50 shadow-sm">
+                                        <span class="text-sm font-bold text-earth-700">₹749/mo</span>
+                                    </div>
+                                </div>
+                                <!-- 35-50 -->
+                                <div class="shrink-0 snap-center w-[130px] flex flex-col items-center justify-between p-4 rounded-2xl border border-earth-100 bg-earth-50/30">
+                                    <div class="text-center mb-3">
+                                        <span class="block font-bold text-earth-900 text-xl leading-none mb-1.5">35-50</span>
+                                        <span class="text-xs text-earth-500 uppercase font-bold tracking-wider">Plants</span>
+                                    </div>
+                                    <div class="w-full rounded-lg py-1.5 text-center bg-white border border-earth-100/50 shadow-sm">
+                                        <span class="text-sm font-bold text-earth-700">₹999/mo</span>
+                                    </div>
+                                </div>
+                                <!-- 50-75 -->
+                                <div class="shrink-0 snap-center w-[130px] flex flex-col items-center justify-between p-4 rounded-2xl border border-earth-100 bg-earth-50/30">
+                                    <div class="text-center mb-3">
+                                        <span class="block font-bold text-earth-900 text-xl leading-none mb-1.5">50-75</span>
+                                        <span class="text-xs text-earth-500 uppercase font-bold tracking-wider">Plants</span>
+                                    </div>
+                                    <div class="w-full rounded-lg py-1.5 text-center bg-white border border-earth-100/50 shadow-sm">
+                                        <span class="text-sm font-bold text-earth-700">₹1249/mo</span>
+                                    </div>
+                                </div>
+                                <!-- 75-100 -->
+                                <div class="shrink-0 snap-center w-[130px] flex flex-col items-center justify-between p-4 rounded-2xl border border-earth-100 bg-earth-50/30">
+                                    <div class="text-center mb-3">
+                                        <span class="block font-bold text-earth-900 text-xl leading-none mb-1.5">75-100</span>
+                                        <span class="text-xs text-earth-500 uppercase font-bold tracking-wider">Plants</span>
+                                    </div>
+                                    <div class="w-full rounded-lg py-1.5 text-center bg-white border border-earth-100/50 shadow-sm">
+                                        <span class="text-sm font-bold text-earth-700">₹1499/mo</span>
+                                    </div>
+                                </div>
+                                <!-- 100+ -->
+                                <div class="shrink-0 snap-center w-[130px] flex flex-col items-center justify-between p-4 rounded-2xl border border-earth-100 bg-earth-50/30">
+                                    <div class="text-center mb-3">
+                                        <span class="block font-bold text-earth-900 text-xl leading-none mb-1.5">100+</span>
+                                        <span class="text-xs text-earth-500 uppercase font-bold tracking-wider">Plants</span>
+                                    </div>
+                                    <div class="w-full rounded-lg py-1.5 text-center bg-white border border-earth-100/50 shadow-sm">
+                                        <span class="text-sm font-bold text-earth-700">₹1999/mo</span>
+                                    </div>
+                                </div>
+                                <!-- Spacer -->
+                                <div class="w-4 shrink-0"></div>
+                            </div>
+                        </div>
+
+                        <!-- Social Proof Section -->
+                        <div class="px-6 pb-8 pt-2 bg-white">
+                            <div class="bg-earth-50/50 rounded-2xl p-4 border border-earth-100/60 flex items-center justify-between shadow-sm">
+                                <div class="flex items-center gap-4">
+                                    <div class="flex -space-x-3 shrink-0">
+                                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&h=100" alt="User" class="w-9 h-9 rounded-full border-2 border-white object-cover">
+                                        <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=100&h=100" alt="User" class="w-9 h-9 rounded-full border-2 border-white object-cover">
+                                        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&h=100" alt="User" class="w-9 h-9 rounded-full border-2 border-white object-cover">
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <div class="flex text-yellow-500 text-[10px] gap-0.5">
+                                            <svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                            <svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                            <svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                            <svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                            <svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                        </div>
+                                        <span class="text-sm font-medium text-earth-800 leading-tight mt-1">1000+ Happy Parents</span>
+                                    </div>
+                                </div>
+                                <div class="bg-white p-2 rounded-full border border-earth-100">
+                                    <svg class="w-[18px] h-[18px] text-earth-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M7 20h10"/><path d="M10 20c5.5-2.5.8-6.4 3-10"/><path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z"/><path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z"/>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dark Brand Footer -->
+                        <div class="bg-[#1a2e1a] text-earth-100 px-8 py-10">
+
+                            <!-- Brand Header -->
+                            <div class="flex items-center gap-3 mb-6">
+                                <div class="w-12 h-12 rounded-full bg-earth-800/50 flex items-center justify-center text-earth-300 ring-1 ring-white/10">
+                                    <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M7 20h10"/><path d="M10 20c5.5-2.5.8-6.4 3-10"/><path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z"/><path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="font-serif font-bold text-2xl text-white leading-none mb-1">PotPot</h3>
+                                    <p class="text-xs uppercase tracking-widest text-earth-400 font-medium">by Atlas Ventures</p>
+                                </div>
+                            </div>
+
+                            <p class="text-earth-300 text-sm mb-10 font-light leading-relaxed border-l-2 border-earth-700/50 pl-5">
+                                Professional plant care for your home and office. We inspect, clean, prune, feed, and treat every plant.
+                            </p>
+
+                            <!-- Contact Info -->
+                            <div class="mb-10">
+                                <h4 class="text-white font-bold text-xs uppercase tracking-widest mb-5 opacity-60">Contact Us</h4>
+                                <div class="space-y-4 text-sm text-earth-200">
+                                    <div class="flex items-start gap-3">
+                                        <svg class="w-[18px] h-[18px] shrink-0 mt-0.5 text-earth-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                                        </svg>
+                                        <span class="font-mono tracking-wide">+91 9187446496</span>
+                                    </div>
+                                    <div class="flex items-start gap-3">
+                                        <svg class="w-[18px] h-[18px] shrink-0 mt-0.5 text-earth-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>
+                                        </svg>
+                                        <span class="leading-snug">Bangalore, Karnataka, India</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Divider -->
+                            <div class="h-px bg-white/10 w-full mb-8"></div>
+
+                            <!-- Links -->
+                            <div class="flex flex-wrap gap-x-8 gap-y-4 text-xs text-earth-400 mb-8 font-medium">
+                                <a href="terms.html" class="hover:text-white transition-colors">Terms of Service</a>
+                                <a href="privacy.html" class="hover:text-white transition-colors">Privacy Policy</a>
+                                <a href="refund.html" class="hover:text-white transition-colors">Refund Policy</a>
+                            </div>
+
+                            <!-- Copyright -->
+                            <div class="text-xs text-earth-600 flex items-center justify-between">
+                                <span>© 2025 PotPot</span>
+                                <span class="flex items-center gap-2 opacity-50">
+                                    <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
+                                    </svg>
+                                    Atlas Ventures
+                                </span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Floating WhatsApp Button -->
+            <button
+                id="floatingWhatsApp"
+                onclick="openWhatsApp()"
+                class="fixed bottom-36 right-5 z-[100] bg-[#25D366] text-white shadow-lg shadow-green-900/30 p-4 rounded-full flex items-center justify-center transition-transform active:scale-95"
+                aria-label="Chat on WhatsApp"
+            >
+                <svg class="w-7 h-7" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.008-.57-.008-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.304-5.266c0-5.443 4.429-9.876 9.88-9.876 2.64 0 5.122 1.03 6.988 2.896a9.825 9.825 0 012.893 6.991c-.003 5.444-4.432 9.877-9.883 9.877"/>
+                </svg>
+            </button>
+
+            <!-- Sticky Footer CTA -->
+            <div class="absolute bottom-0 left-0 right-0 z-50">
+                <div class="relative w-full shrink-0">
+
+                    <!-- Plant Selector Drawer -->
+                    <div id="plantSelectorDrawer" class="hidden absolute bottom-[calc(100%-10px)] left-0 w-full bg-white rounded-t-2xl shadow-2xl p-5 z-20 border-t border-earth-100">
+                        <div class="flex justify-between items-center mb-4 px-1">
+                            <span class="text-xs font-bold text-earth-500 uppercase tracking-widest">Select Number of Plants</span>
+                            <button onclick="closePlantSelector()" class="bg-earth-50 text-earth-400 p-1.5 rounded-full hover:bg-earth-100">
+                                <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="m18 15-6-6-6 6"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3" id="plantTierGrid"></div>
+                    </div>
+
+                    <!-- Backdrop for drawer -->
+                    <div id="selectorBackdrop" class="hidden fixed inset-0 bg-black/40 z-10" onclick="closePlantSelector()"></div>
+
+                    <!-- Gradient fade -->
+                    <div class="absolute -top-6 left-0 right-0 h-6 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
+
+                    <div class="px-5 pb-5 pt-2 bg-white relative z-30 shadow-[0_-5px_20px_-5px_rgba(0,0,0,0.05)] border-t border-earth-50">
+                        <div class="flex flex-col gap-2">
+
+                            <!-- Plant Selection & Price Display -->
+                            <button
+                                onclick="togglePlantSelector()"
+                                class="w-full flex items-center justify-between bg-earth-50/50 border border-earth-100 py-2 px-4 rounded-lg active:bg-earth-100 transition-colors"
+                            >
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs font-bold text-earth-500 uppercase tracking-wide">Plants:</span>
+                                    <div class="flex items-center gap-1 bg-white px-2 py-0.5 rounded border border-earth-100 shadow-sm">
+                                        <span id="selectedPlantRange" class="text-sm font-bold text-earth-900">0-20</span>
+                                        <svg class="w-3 h-3 text-earth-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="m6 9 6 6 6-6"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <span id="selectedPrice" class="text-lg font-bold text-earth-900">₹499</span>
+                            </button>
+
+                            <!-- Primary Booking Button -->
+                            <a
+                                id="bookingCTA"
+                                href="booking.html?plants=0-20"
+                                onclick="trackBookVisit()"
+                                class="w-full bg-earth-800 text-white py-3 rounded-xl shadow-lg shadow-earth-900/10 hover:bg-earth-900 active:scale-[0.99] transition-all flex flex-col items-center justify-center gap-0.5 no-underline"
+                            >
+                                <span class="font-bold text-base uppercase tracking-wide">Book Your First Visit</span>
+                                <span class="text-[10px] font-medium text-earth-200 tracking-wide opacity-90">No Pre-payment Needed</span>
+                            </a>
+
                         </div>
                     </div>
+                </div>
+            </div>
 
-                    <div class="selected-location" id="selectedLocationBox" style="display: none;">
-                        <div class="location-text" id="selectedAddress">-</div>
-                        <div class="pincode-badge" id="selectedPincode">-</div>
-                    </div>
+            <!-- Booking Modal -->
+            <div id="bookingModal" class="fixed inset-0 z-[60] hidden items-end justify-center sm:items-center p-4">
+                <!-- Backdrop -->
+                <div class="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity" onclick="closeModal()"></div>
 
-                    <div id="addressDetailsFields" style="display: none;">
-                        <div class="form-group">
-                            <label for="houseNumber">House / Flat Number</label>
-                            <input type="text" id="houseNumber" placeholder="e.g. 101, A-502">
+                <!-- Modal Content -->
+                <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl relative overflow-hidden animate-in">
+                    <div class="p-6 pt-8">
+                        <button
+                            onclick="closeModal()"
+                            class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 bg-gray-50 p-1 rounded-full"
+                        >
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+                            </svg>
+                        </button>
+
+                        <div class="text-center mb-6">
+                            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 text-green-700">
+                                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-xl font-bold text-gray-900">Let's chat!</h3>
+                            <p class="text-gray-500 text-sm mt-2">
+                                We coordinate all visits personally via WhatsApp to ensure your plants get the specific care they need.
+                            </p>
                         </div>
 
-                        <div class="form-group">
-                            <label for="buildingName">Building / Apartment Name (Optional)</label>
-                            <input type="text" id="buildingName" placeholder="e.g. Prestige Towers">
-                        </div>
+                        <button
+                            onclick="redirectToWhatsApp()"
+                            class="w-full bg-[#25D366] text-white font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 hover:bg-[#20bd5a] transition-colors"
+                        >
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.008-.57-.008-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.304-5.266c0-5.443 4.429-9.876 9.88-9.876 2.64 0 5.122 1.03 6.988 2.896a9.825 9.825 0 012.893 6.991c-.003 5.444-4.432 9.877-9.883 9.877"/>
+                            </svg>
+                            Continue to WhatsApp
+                        </button>
+
+                        <p class="text-center text-xs text-gray-400 mt-4">
+                            You'll receive a quote based on your plant count instantly.
+                        </p>
                     </div>
-
-                    <button id="continueBtn" class="btn btn-primary" onclick="validatePincodeAndContinue()">Continue</button>
-                </div>
-
-                <div id="pincodeError" style="display: none;">
-                    <div class="message info">
-                        <strong>Coming soon to your area!</strong><br>
-                        We're expanding fast and will be available in your location soon.
-                    </div>
-                    <button class="btn btn-secondary" onclick="tryAnotherLocation()">← Try Another Location</button>
                 </div>
             </div>
 
-            <!-- Step 2: Customer Details -->
-            <div id="step2" class="step">
-                <h2 class="step-title">Your Details</h2>
-
-                <div class="form-group">
-                    <label for="customerName">Your Name</label>
-                    <input type="text" id="customerName" placeholder="Enter your name">
-                </div>
-
-                <div class="form-group">
-                    <label for="customerPhone">WhatsApp Number</label>
-                    <input type="tel" id="customerPhone" placeholder="10-digit number">
-                </div>
-
-                <div class="form-group">
-                    <label for="plantCount">Number of Plants</label>
-                    <select id="plantCount">
-                        <option value="">Select range</option>
-                        <option value="0-20">0 - 20 plants</option>
-                        <option value="20-35">20 - 35 plants</option>
-                        <option value="35-50">35 - 50 plants</option>
-                        <option value="50-75">50 - 75 plants</option>
-                        <option value="75-100">75 - 100 plants</option>
-                        <option value="100+">100+ plants</option>
-                    </select>
-                </div>
-
-                <button class="btn btn-primary" onclick="checkAvailability()">Check Available Slots</button>
-                <button class="btn btn-secondary" onclick="goToStep(1)">← Change Location</button>
-            </div>
-
-            <!-- Step 3: Date & Time Selection -->
-            <div id="step3" class="step">
-                <div id="slotsLoading" class="loading" style="display: none;">
-                    <div class="spinner"></div>
-                    <p>Finding available slots...</p>
-                </div>
-
-                <div id="slotsContent" style="display: none;">
-                    <h2 class="step-title">Select a date</h2>
-                    <div id="calendarContainer" class="calendar-container"></div>
-
-                    <h2 id="timeSection" class="step-title">Select a time</h2>
-                    <div id="timeGrid" class="time-grid"></div>
-
-                    <button id="confirmBookingBtn" class="btn btn-primary" onclick="submitBooking()" disabled>Confirm Booking</button>
-                    <button class="btn btn-secondary" onclick="goToStep(2)">← Back</button>
-                </div>
-
-                <div id="noService" style="display: none;">
-                    <div class="message info">
-                        <strong>Coming soon to your area!</strong><br>
-                        We're expanding fast and will be available in your location soon.
-                    </div>
-                    <button class="btn btn-secondary" onclick="goToStep(1)">← Try Another Location</button>
-                </div>
-            </div>
-
-            <!-- Step 4: Success -->
-            <div id="step4" class="step">
-                <div style="text-align: center;">
-                    <div class="success-icon">✅</div>
-                    <h2 class="step-title">Booking Confirmed!</h2>
-                    <p style="color: #666; margin-bottom: 16px;">Your plant care visit has been scheduled.</p>
-                </div>
-
-                <div class="booking-summary" id="bookingSummary"></div>
-
-                <div style="background: #e8f5e9; padding: 16px; border-radius: 10px; margin-bottom: 16px;">
-                    <strong style="color: #2e7d32;">What's next?</strong>
-                    <p style="color: #555; font-size: 14px; margin-top: 8px;">
-                        Our expert will visit at the scheduled time. First visit includes a free plant health check! 🌱
-                    </p>
-                </div>
-            </div>
-
-            <!-- Footer Links -->
-            <div style="text-align: center; padding: 16px; margin-top: 16px; border-top: 1px solid #e0e0e0;">
-                <div style="display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; font-size: 12px;">
-                    <a href="terms.html" style="color: #666; text-decoration: none;">Terms of Service</a>
-                    <a href="privacy.html" style="color: #666; text-decoration: none;">Privacy Policy</a>
-                    <a href="refund.html" style="color: #666; text-decoration: none;">Refund Policy</a>
-                </div>
-                <p style="font-size: 11px; color: #999; margin-top: 8px;">&copy; 2025 PotPot by Atlas Ventures</p>
-            </div>
         </div>
     </div>
 
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDe963moD7w8fBZDDcGbrjJNJllhpknMy8&libraries=places&callback=initAutocomplete" async defer></script>
     <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbyk4WNSnGZ6Ec4LdfELvxNd0Fw21qYq3g2Rncvt1Fg6ZU24kXjFFveHrzfydZoMRhsXUg/exec';
+        // Pricing tiers
+        const pricingTiers = [
+            { label: "0-20", value: 499 },
+            { label: "20-35", value: 749 },
+            { label: "35-50", value: 999 },
+            { label: "50-75", value: 1249 },
+            { label: "75-100", value: 1499 },
+            { label: "100+", value: 1999 },
+        ];
+        let selectedTier = pricingTiers[0];
 
-        let bookingData = {
-            pincode: '',
-            fullAddress: '',
-            mapLink: '',
-            lat: null,
-            lng: null,
-            gardenerID: '',
-            gardenerName: '',
-            customerName: '',
-            phone: '',
-            plantCount: '',
-            date: '',
-            dateFormatted: '',
-            timeSlot: '',
-            availabilityRowIndex: null
-        };
-
-        let availableSlots = null;
-        let autocomplete = null;
-        let map = null;
-        let marker = null;
-        let geocoder = null;
-        let currentCalendarMonth = null;
-        let currentCalendarYear = null;
-        let slotsMap = {};
-
-        const BENGALURU = {
-            lat: 12.9716,
-            lng: 77.5946
-        };
-
-        function initAutocomplete() {
-            geocoder = new google.maps.Geocoder();
-
-            map = new google.maps.Map(document.getElementById('map'), {
-                center: BENGALURU,
-                zoom: 13,
-                disableDefaultUI: true,
-                zoomControl: true,
-                styles: [
-                    {
-                        featureType: 'poi',
-                        elementType: 'labels',
-                        stylers: [{ visibility: 'off' }]
-                    }
-                ]
-            });
-
-            marker = new google.maps.Marker({
-                position: BENGALURU,
-                map: map,
-                draggable: true,
-                animation: google.maps.Animation.DROP
-            });
-
-            marker.addListener('dragend', () => {
-                const position = marker.getPosition();
-                reverseGeocode(position.lat(), position.lng());
-            });
-
-            const input = document.getElementById('addressSearch');
-            input.setAttribute('autocomplete', 'new-password');
-
-            autocomplete = new google.maps.places.Autocomplete(input, {
-                componentRestrictions: { country: 'in' },
-                fields: ['address_components', 'formatted_address', 'geometry', 'name']
-            });
-
-            autocomplete.addListener('place_changed', onPlaceSelected);
-
-            input.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') e.preventDefault();
-            });
-
-            input.addEventListener('input', () => {
-                document.getElementById('selectedLocationBox').style.display = 'none';
-                document.getElementById('addressDetailsFields').style.display = 'none';
-                document.getElementById('houseNumber').value = '';
-                document.getElementById('buildingName').value = '';
-                bookingData.pincode = '';
-                bookingData.fullAddress = '';
-            });
+        // Initialize plant selector grid
+        function initPlantSelector() {
+            const grid = document.getElementById('plantTierGrid');
+            grid.innerHTML = pricingTiers.map(tier => `
+                <button
+                    onclick="selectTier('${tier.label}')"
+                    class="tier-btn flex items-center justify-between px-4 py-3 rounded-xl border transition-all ${
+                        selectedTier.label === tier.label
+                        ? 'bg-earth-800 text-white border-earth-800 shadow-md'
+                        : 'bg-white text-earth-600 border-earth-200 hover:border-earth-300 hover:bg-earth-50'
+                    }"
+                    data-tier="${tier.label}"
+                >
+                    <span class="text-sm font-bold">${tier.label} Plants</span>
+                    <span class="text-sm font-medium ${selectedTier.label === tier.label ? 'text-earth-200' : 'text-earth-600'}">₹${tier.value}</span>
+                </button>
+            `).join('');
         }
 
-        function onPlaceSelected() {
-            const place = autocomplete.getPlace();
-
-            if (!place.address_components) {
-                alert('Please select an address from the dropdown');
-                return;
-            }
-
-            if (place.geometry && place.geometry.location) {
-                map.setCenter(place.geometry.location);
-                map.setZoom(17);
-                marker.setPosition(place.geometry.location);
-            }
-
-            const pos = marker.getPosition();
-            updateAddressFromComponents(place.address_components, place.formatted_address, pos.lat(), pos.lng());
+        function selectTier(label) {
+            selectedTier = pricingTiers.find(t => t.label === label);
+            document.getElementById('selectedPlantRange').textContent = selectedTier.label;
+            document.getElementById('selectedPrice').textContent = '₹' + selectedTier.value;
+            document.getElementById('bookingCTA').href = 'booking.html?plants=' + encodeURIComponent(selectedTier.label);
+            initPlantSelector(); // Re-render to update selection
+            closePlantSelector();
         }
 
-        function reverseGeocode(lat, lng) {
-            geocoder.geocode({ location: { lat, lng } }, (results, status) => {
-                if (status === 'OK' && results[0]) {
-                    updateAddressFromComponents(results[0].address_components, results[0].formatted_address, lat, lng);
-                }
-            });
-        }
-
-        function updateAddressFromComponents(components, formattedAddress, lat, lng) {
-            let pincode = '';
-
-            for (const component of components) {
-                if (component.types.includes('postal_code')) {
-                    pincode = component.long_name;
-                }
-            }
-
-            if (!pincode) {
-                alert('Could not detect pincode. Please drag the pin to a more specific location.');
-                return;
-            }
-
-            bookingData.pincode = pincode;
-            bookingData.fullAddress = formattedAddress;
-            bookingData.mapLink = `https://www.google.com/maps?q=${lat},${lng}`;
-            bookingData.lat = lat;
-            bookingData.lng = lng;
-
-            document.getElementById('selectedAddress').textContent = formattedAddress;
-            document.getElementById('selectedPincode').textContent = 'Pincode: ' + pincode;
-            document.getElementById('selectedLocationBox').style.display = 'block';
-            document.getElementById('addressDetailsFields').style.display = 'block';
-        }
-
-        function goToStep(step) {
-            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-            document.getElementById(`step${step}`).classList.add('active');
-
-            // Track step progression
-            const stepEvents = {
-                1: 'address_screen',
-                2: 'details_screen',
-                3: 'datetime_screen',
-                4: 'confirmation_screen'
-            };
-            if (stepEvents[step]) {
-                trackEvent(stepEvents[step]);
-            }
-        }
-
-        async function validatePincodeAndContinue() {
-            const pincode = bookingData.pincode;
-            const houseNumber = document.getElementById('houseNumber').value.trim();
-
-            if (!pincode) {
-                alert('Please select an address first');
-                return;
-            }
-
-            if (!houseNumber) {
-                alert('Please enter your house/flat number');
-                return;
-            }
-
-            // Show loading state
-            const btn = document.getElementById('continueBtn');
-            const originalText = btn.textContent;
-            btn.disabled = true;
-            btn.textContent = 'Checking...';
-
-            try {
-                const response = await fetch(`${API_URL}?action=validatePincode&pincode=${pincode}`);
-                const data = await response.json();
-
-                btn.disabled = false;
-                btn.textContent = originalText;
-
-                if (data.valid) {
-                    goToStep(2);
-                } else {
-                    // Show dedicated "Coming soon" screen
-                    trackEvent('pincode_not_served', {pincode: pincode});
-                    document.getElementById('step1Content').style.display = 'none';
-                    document.getElementById('pincodeError').style.display = 'block';
-                }
-            } catch (error) {
-                console.error('Error validating pincode:', error);
-                btn.disabled = false;
-                btn.textContent = originalText;
-                // On error, allow user to continue (fail open) - the slot check will catch it later
-                goToStep(2);
-            }
-        }
-
-        function tryAnotherLocation() {
-            // Reset and show the form again
-            document.getElementById('step1Content').style.display = 'block';
-            document.getElementById('pincodeError').style.display = 'none';
-
-            // Clear the address fields
-            document.getElementById('addressSearch').value = '';
-            document.getElementById('selectedLocationBox').style.display = 'none';
-            document.getElementById('addressDetailsFields').style.display = 'none';
-            document.getElementById('houseNumber').value = '';
-            document.getElementById('buildingName').value = '';
-            bookingData.pincode = '';
-            bookingData.fullAddress = '';
-            bookingData.lat = null;
-            bookingData.lng = null;
-
-            // Reset map to default position
-            if (map && marker) {
-                map.setCenter(BENGALURU);
-                map.setZoom(13);
-                marker.setPosition(BENGALURU);
-            }
-        }
-
-        async function checkAvailability() {
-            const pincode = bookingData.pincode;
-            const customerName = document.getElementById('customerName').value.trim();
-            const customerPhone = document.getElementById('customerPhone').value.trim();
-            const plantCount = document.getElementById('plantCount').value;
-
-            if (!pincode) {
-                alert('Please select an address first');
-                goToStep(1);
-                return;
-            }
-
-            if (!customerName) {
-                alert('Please enter your name');
-                return;
-            }
-
-            if (!customerPhone || customerPhone.length < 10) {
-                alert('Please enter a valid phone number');
-                return;
-            }
-
-            if (!plantCount) {
-                alert('Please select the number of plants');
-                return;
-            }
-
-            bookingData.customerName = customerName;
-            // Add 91 prefix for WATI - remove any existing prefix first
-            let cleanPhone = customerPhone.replace(/^(\+91|91|0)/, '');
-            bookingData.phone = '91' + cleanPhone;
-            bookingData.plantCount = plantCount;
-
-            const houseNumber = document.getElementById('houseNumber').value.trim();
-            const buildingName = document.getElementById('buildingName').value.trim();
-            let completeAddress = '';
-
-            if (houseNumber) completeAddress += houseNumber + ', ';
-            if (buildingName) completeAddress += buildingName + ', ';
-            completeAddress += bookingData.fullAddress;
-
-            bookingData.fullAddress = completeAddress;
-
-            goToStep(3);
-            document.getElementById('slotsLoading').style.display = 'block';
-            document.getElementById('slotsContent').style.display = 'none';
-            document.getElementById('noService').style.display = 'none';
-
-            try {
-                const response = await fetch(`${API_URL}?pincode=${pincode}&lat=${bookingData.lat}&lng=${bookingData.lng}`);
-                const data = await response.json();
-
-                document.getElementById('slotsLoading').style.display = 'none';
-
-                if (data.success && data.slots.available) {
-                    availableSlots = data.slots;
-                    bookingData.gardenerID = data.slots.gardenerID;
-                    bookingData.gardenerName = data.slots.gardenerName;
-                    renderDateGrid(data.slots.dates);
-                    document.getElementById('slotsContent').style.display = 'block';
-                } else {
-                    document.getElementById('noService').style.display = 'block';
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Something went wrong. Please try again.');
-                goToStep(2);
-            }
-        }
-
-        function renderDateGrid(dates) {
-            // Build a map of available dates for quick lookup
-            slotsMap = {};
-            dates.forEach(d => {
-                slotsMap[d.date] = d;
-            });
-
-            // Find the first available date (tomorrow or first with slots)
-            const tomorrow = new Date();
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            tomorrow.setHours(0, 0, 0, 0);
-
-            let defaultDate = null;
-            for (const d of dates) {
-                if (d.times && d.times.length > 0) {
-                    defaultDate = d;
-                    break;
-                }
-            }
-
-            // Set calendar to show the month of the default date (tomorrow)
-            currentCalendarMonth = tomorrow.getMonth();
-            currentCalendarYear = tomorrow.getFullYear();
-
-            // Render the calendar
-            renderCalendar();
-
-            // Select the default date
-            if (defaultDate) {
-                selectDateByKey(defaultDate.date);
-            }
-        }
-
-        function renderCalendar() {
-            const container = document.getElementById('calendarContainer');
-            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-                'July', 'August', 'September', 'October', 'November', 'December'];
-            const dayNames = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
-
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const tomorrow = new Date(today);
-            tomorrow.setDate(tomorrow.getDate() + 1);
-
-            // Calculate min/max months for navigation
-            const minMonth = tomorrow.getMonth();
-            const minYear = tomorrow.getFullYear();
-            const maxDate = new Date(tomorrow);
-            maxDate.setDate(maxDate.getDate() + 60); // Allow up to 60 days ahead
-            const maxMonth = maxDate.getMonth();
-            const maxYear = maxDate.getFullYear();
-
-            const canGoPrev = (currentCalendarYear > minYear) ||
-                (currentCalendarYear === minYear && currentCalendarMonth > minMonth);
-            const canGoNext = (currentCalendarYear < maxYear) ||
-                (currentCalendarYear === maxYear && currentCalendarMonth < maxMonth);
-
-            // Build calendar HTML
-            let html = `
-                <div class="calendar-header">
-                    <span class="month-year">${monthNames[currentCalendarMonth]} ${currentCalendarYear}</span>
-                    <div class="calendar-nav">
-                        <button onclick="prevMonth()" ${!canGoPrev ? 'disabled' : ''}>‹</button>
-                        <button onclick="nextMonth()" ${!canGoNext ? 'disabled' : ''}>›</button>
-                    </div>
-                </div>
-                <div class="calendar-weekdays">
-                    ${dayNames.map(d => `<span>${d}</span>`).join('')}
-                </div>
-                <div class="calendar-days">
-            `;
-
-            // Get first day of month and total days
-            const firstDay = new Date(currentCalendarYear, currentCalendarMonth, 1).getDay();
-            const daysInMonth = new Date(currentCalendarYear, currentCalendarMonth + 1, 0).getDate();
-
-            // Empty cells for days before the 1st
-            for (let i = 0; i < firstDay; i++) {
-                html += `<button class="calendar-day empty" disabled></button>`;
-            }
-
-            // Days of the month
-            for (let day = 1; day <= daysInMonth; day++) {
-                const dateObj = new Date(currentCalendarYear, currentCalendarMonth, day);
-                const dateKey = formatDateKey(dateObj);
-                const slotData = slotsMap[dateKey];
-                const hasSlots = slotData && slotData.times && slotData.times.length > 0;
-                const isPast = dateObj < tomorrow;
-                const isToday = dateObj.getTime() === today.getTime();
-                const isSelected = bookingData.date === dateKey;
-
-                let classes = 'calendar-day';
-                if (isSelected) classes += ' selected';
-                if (hasSlots) classes += ' has-slots';
-
-                const isDisabled = isPast || !hasSlots;
-
-                html += `<button class="${classes}"
-                    ${isDisabled ? 'disabled' : `onclick="selectDateByKey('${dateKey}')"`}
-                    title="${hasSlots ? 'Available' : (isPast ? 'Past date' : 'No slots available')}"
-                >${day}</button>`;
-            }
-
-            html += `</div>`;
-            container.innerHTML = html;
-        }
-
-        function formatDateKey(date) {
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
-        }
-
-        function prevMonth() {
-            currentCalendarMonth--;
-            if (currentCalendarMonth < 0) {
-                currentCalendarMonth = 11;
-                currentCalendarYear--;
-            }
-            renderCalendar();
-        }
-
-        function nextMonth() {
-            currentCalendarMonth++;
-            if (currentCalendarMonth > 11) {
-                currentCalendarMonth = 0;
-                currentCalendarYear++;
-            }
-            renderCalendar();
-        }
-
-        function selectDateByKey(dateKey) {
-            const dateObj = slotsMap[dateKey];
-            if (!dateObj) return;
-
-            bookingData.date = dateObj.date;
-            bookingData.dateFormatted = dateObj.dateFormatted;
-            bookingData.timeSlot = '';
-            bookingData.availabilityRowIndex = null;
-            document.getElementById('confirmBookingBtn').disabled = true;
-
-            renderCalendar();
-            renderTimeGrid(dateObj.times);
-
-            // Smooth scroll to time section
-            setTimeout(() => {
-                document.getElementById('timeSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 100);
-        }
-
-        function renderTimeGrid(times) {
-            const grid = document.getElementById('timeGrid');
-            grid.innerHTML = '';
-
-            times.forEach(t => {
-                const btn = document.createElement('button');
-                btn.className = 'time-btn';
-                btn.textContent = t.time;
-                btn.onclick = () => selectTime(t, btn);
-                grid.appendChild(btn);
-            });
-        }
-
-        function selectTime(timeObj, btn) {
-            document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('selected'));
-            btn.classList.add('selected');
-            bookingData.timeSlot = timeObj.time;
-            bookingData.availabilityRowIndex = timeObj.rowIndex;
-            document.getElementById('confirmBookingBtn').disabled = false;
-        }
-
-        async function submitBooking() {
-            const payload = {
-                ...bookingData,
-                address: bookingData.fullAddress,
-                notes: ''
-            };
-
-            const btn = document.getElementById('confirmBookingBtn');
-            btn.disabled = true;
-            btn.textContent = 'Booking...';
-
-            try {
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'text/plain'
-                    },
-                    body: JSON.stringify(payload)
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    showSuccess(result.booking);
-                } else {
-                    alert(result.error || 'Booking failed. Please try again.');
-                    btn.disabled = false;
-                    btn.textContent = 'Confirm Booking';
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Something went wrong. Please try again.');
-                btn.disabled = false;
-                btn.textContent = 'Confirm Booking';
-            }
-        }
-
-        function showSuccess(booking) {
-            // Track Lead event in Meta Pixel
-            if (typeof fbq === 'function') {
-                fbq('track', 'Lead', {
-                    content_name: 'Plant Care Booking',
-                    content_category: 'Booking Confirmation'
+        // Track Book Visit click
+        function trackBookVisit() {
+            // Google Analytics
+            if (typeof gtag !== 'undefined') {
+                gtag('event', 'click_book_visit', {
+                    page: 'home',
+                    plants: selectedTier.label,
+                    price: selectedTier.value
                 });
             }
-
-            // Track Lead/Booking completed in GA4
-            trackEvent('booking_completed', {
-                event_category: 'conversion',
-                event_label: 'Plant Care Booking'
-            });
-
-            document.getElementById('bookingSummary').innerHTML = `
-                <div class="row">
-                    <span class="label">Booking ID</span>
-                    <span class="value">${booking.bookingID}</span>
-                </div>
-                <div class="row">
-                    <span class="label">Date</span>
-                    <span class="value">${bookingData.dateFormatted}</span>
-                </div>
-                <div class="row">
-                    <span class="label">Time</span>
-                    <span class="value">${bookingData.timeSlot}</span>
-                </div>
-                <div class="row location-row">
-                    <span class="label">Location</span>
-                    <span class="value">${bookingData.fullAddress}</span>
-                </div>
-            `;
-            goToStep(4);
+            // Meta Pixel - Custom event
+            if (typeof fbq !== 'undefined') {
+                fbq('trackCustom', 'click_book_visit', {
+                    page: 'home',
+                    plants: selectedTier.label,
+                    price: selectedTier.value
+                });
+                // Meta Pixel - Standard InitiateCheckout event
+                fbq('track', 'InitiateCheckout', {
+                    content_name: 'Book Visit',
+                    value: selectedTier.value,
+                    currency: 'INR'
+                });
+            }
+            console.log('Book Visit tracked:', selectedTier);
         }
 
-        // Pre-select plant count from URL parameter (when coming from home page)
-        (function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const plants = urlParams.get('plants');
-            if (plants) {
-                const plantSelect = document.getElementById('plantCount');
-                if (plantSelect) {
-                    // Check if the value exists in options
-                    const options = Array.from(plantSelect.options);
-                    const matchingOption = options.find(opt => opt.value === plants);
-                    if (matchingOption) {
-                        plantSelect.value = plants;
-                    }
-                }
+        function togglePlantSelector() {
+            const drawer = document.getElementById('plantSelectorDrawer');
+            const backdrop = document.getElementById('selectorBackdrop');
+            const whatsappBtn = document.getElementById('floatingWhatsApp');
+
+            if (drawer.classList.contains('hidden')) {
+                drawer.classList.remove('hidden');
+                backdrop.classList.remove('hidden');
+                whatsappBtn.classList.add('hidden');
+            } else {
+                closePlantSelector();
             }
-        })();
+        }
+
+        function closePlantSelector() {
+            document.getElementById('plantSelectorDrawer').classList.add('hidden');
+            document.getElementById('selectorBackdrop').classList.add('hidden');
+            document.getElementById('floatingWhatsApp').classList.remove('hidden');
+        }
+
+        function openModal() {
+            const modal = document.getElementById('bookingModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('bookingModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function openWhatsApp() {
+            trackEvent('click_whatsapp', {page: 'home'});
+            window.open('https://wa.me/919187446496', '_blank');
+        }
+
+        function redirectToWhatsApp() {
+            trackEvent('click_whatsapp', {page: 'home', source: 'modal'});
+            const text = "Hi PotPot! I'm interested in booking a plant care visit for my home. Please help me with the next steps.";
+            window.open(`https://wa.me/919187446496?text=${encodeURIComponent(text)}`, '_blank');
+            closeModal();
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', initPlantSelector);
     </script>
 </body>
 </html>
