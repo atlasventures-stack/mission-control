@@ -1150,6 +1150,23 @@
             `;
             goToStep(4);
         }
+
+        // Pre-select plant count from URL parameter (when coming from home page)
+        (function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const plants = urlParams.get('plants');
+            if (plants) {
+                const plantSelect = document.getElementById('plantCount');
+                if (plantSelect) {
+                    // Check if the value exists in options
+                    const options = Array.from(plantSelect.options);
+                    const matchingOption = options.find(opt => opt.value === plants);
+                    if (matchingOption) {
+                        plantSelect.value = plants;
+                    }
+                }
+            }
+        })();
     </script>
 </body>
 </html>

@@ -488,7 +488,8 @@
 
                             <!-- Primary Booking Button -->
                             <a
-                                href="index.html"
+                                id="bookingCTA"
+                                href="index.html?plants=0-20"
                                 onclick="trackEvent('click_book_visit', {page: 'home', plants: selectedTier.label, price: selectedTier.value})"
                                 class="w-full bg-earth-800 text-white py-3 rounded-xl shadow-lg shadow-earth-900/10 hover:bg-earth-900 active:scale-[0.99] transition-all flex flex-col items-center justify-center gap-0.5 no-underline"
                             >
@@ -585,6 +586,7 @@
             selectedTier = pricingTiers.find(t => t.label === label);
             document.getElementById('selectedPlantRange').textContent = selectedTier.label;
             document.getElementById('selectedPrice').textContent = '₹' + selectedTier.value;
+            document.getElementById('bookingCTA').href = 'index.html?plants=' + encodeURIComponent(selectedTier.label);
             initPlantSelector(); // Re-render to update selection
             closePlantSelector();
         }
