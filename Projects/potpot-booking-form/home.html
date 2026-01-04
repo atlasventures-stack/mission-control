@@ -494,7 +494,7 @@
                             <a
                                 id="bookingCTA"
                                 href="index.html?plants=0-20"
-                                onclick="trackEvent('click_book_visit', {page: 'home', plants: selectedTier.label, price: selectedTier.value}); fbq('track', 'InitiateCheckout', {content_name: 'Book Visit', value: selectedTier.value, currency: 'INR'});"
+                                onclick="trackBookVisit()"
                                 class="w-full bg-earth-800 text-white py-3 rounded-xl shadow-lg shadow-earth-900/10 hover:bg-earth-900 active:scale-[0.99] transition-all flex flex-col items-center justify-center gap-0.5 no-underline"
                             >
                                 <span class="font-bold text-base uppercase tracking-wide">Book Your First Visit</span>
@@ -593,6 +593,33 @@
             document.getElementById('bookingCTA').href = 'index.html?plants=' + encodeURIComponent(selectedTier.label);
             initPlantSelector(); // Re-render to update selection
             closePlantSelector();
+        }
+
+        // Track Book Visit click
+        function trackBookVisit() {
+            // Google Analytics
+            if (typeof gtag !== 'undefined') {
+                gtag('event', 'click_book_visit', {
+                    page: 'home',
+                    plants: selectedTier.label,
+                    price: selectedTier.value
+                });
+            }
+            // Meta Pixel - Custom event
+            if (typeof fbq !== 'undefined') {
+                fbq('trackCustom', 'click_book_visit', {
+                    page: 'home',
+                    plants: selectedTier.label,
+                    price: selectedTier.value
+                });
+                // Meta Pixel - Standard InitiateCheckout event
+                fbq('track', 'InitiateCheckout', {
+                    content_name: 'Book Visit',
+                    value: selectedTier.value,
+                    currency: 'INR'
+                });
+            }
+            console.log('Book Visit tracked:', selectedTier);
         }
 
         function togglePlantSelector() {
