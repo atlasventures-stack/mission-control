@@ -26,8 +26,22 @@
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
         gtag('config', 'G-L61773NSWQ');
+
+        // Track events
+        function trackEvent(eventName, params = {}) {
+            gtag('event', eventName, params);
+        }
+
+        // Track booking page load
+        window.addEventListener('load', function() {
+            trackEvent('booking_page_load');
+        });
     </script>
     <!-- End Google Analytics -->
+
+    <!-- Vercel Web Analytics -->
+    <script defer src="https://va.vercel-scripts.com/v1/script.js"></script>
+    <!-- End Vercel Web Analytics -->
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -743,6 +757,17 @@
         function goToStep(step) {
             document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
             document.getElementById(`step${step}`).classList.add('active');
+
+            // Track step progression
+            const stepEvents = {
+                1: 'address_screen',
+                2: 'details_screen',
+                3: 'datetime_screen',
+                4: 'confirmation_screen'
+            };
+            if (stepEvents[step]) {
+                trackEvent(stepEvents[step]);
+            }
         }
 
         async function validatePincodeAndContinue() {
@@ -776,6 +801,7 @@
                     goToStep(2);
                 } else {
                     // Show dedicated "Coming soon" screen
+                    trackEvent('pincode_not_served', {pincode: pincode});
                     document.getElementById('step1Content').style.display = 'none';
                     document.getElementById('pincodeError').style.display = 'block';
                 }
@@ -1097,6 +1123,12 @@
                     content_category: 'Booking Confirmation'
                 });
             }
+
+            // Track Lead/Booking completed in GA4
+            trackEvent('booking_completed', {
+                event_category: 'conversion',
+                event_label: 'Plant Care Booking'
+            });
 
             document.getElementById('bookingSummary').innerHTML = `
                 <div class="row">

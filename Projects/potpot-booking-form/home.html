@@ -26,8 +26,22 @@
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
         gtag('config', 'G-L61773NSWQ');
+
+        // Track events
+        function trackEvent(eventName, params = {}) {
+            gtag('event', eventName, params);
+        }
+
+        // Track home page load
+        window.addEventListener('load', function() {
+            trackEvent('landed_home');
+        });
     </script>
     <!-- End Google Analytics -->
+
+    <!-- Vercel Web Analytics -->
+    <script defer src="https://va.vercel-scripts.com/v1/script.js"></script>
+    <!-- End Vercel Web Analytics -->
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -429,6 +443,7 @@
                             <!-- Primary Booking Button -->
                             <a
                                 href="index.html"
+                                onclick="trackEvent('click_book_visit', {page: 'home'})"
                                 class="w-full bg-earth-800 text-white font-bold text-base py-3 rounded-xl shadow-lg shadow-earth-900/10 hover:bg-earth-900 hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 flex items-center justify-center gap-2 group no-underline"
                             >
                                 <span>Book your first visit</span>
@@ -519,10 +534,12 @@
         }
 
         function openWhatsApp() {
+            trackEvent('click_whatsapp', {page: 'home'});
             window.open('https://wa.me/919187446496', '_blank');
         }
 
         function redirectToWhatsApp() {
+            trackEvent('click_whatsapp', {page: 'home', source: 'modal'});
             const text = "Hi PotPot! I'm interested in booking a plant care visit for my home. Please help me with the next steps.";
             window.open(`https://wa.me/919187446496?text=${encodeURIComponent(text)}`, '_blank');
             closeModal();
