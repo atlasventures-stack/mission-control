@@ -60,6 +60,10 @@
         // Track home page load
         window.addEventListener('load', function() {
             trackEvent('landed_home');
+            // Amplitude
+            if (typeof amplitude !== 'undefined') {
+                amplitude.track('Landed Booking');
+            }
         });
     </script>
     <!-- End Google Analytics -->
