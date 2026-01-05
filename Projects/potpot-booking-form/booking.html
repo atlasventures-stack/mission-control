@@ -1,6 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Amplitude Analytics -->
+    <script src="https://cdn.amplitude.com/script/17abf777767237620e6398f575a1fff4.js"></script>
+    <script>
+        window.amplitude.add(window.sessionReplay.plugin({sampleRate: 1}));
+        window.amplitude.init('17abf777767237620e6398f575a1fff4', {
+            "fetchRemoteConfig": true,
+            "autocapture": {
+                "attribution": true,
+                "fileDownloads": true,
+                "formInteractions": true,
+                "pageViews": true,
+                "sessions": true,
+                "elementInteractions": true,
+                "networkTracking": true,
+                "webVitals": true,
+                "frustrationInteractions": true
+            }
+        });
+    </script>
+    <!-- End Amplitude Analytics -->
+
     <!-- Meta Pixel Code -->
     <script>
     !function(f,b,e,v,n,t,s)
@@ -826,6 +847,15 @@
             bookingData.phone = '91' + cleanPhone;
             bookingData.plantCount = plantCount;
 
+            // Track step completion in Amplitude
+            if (typeof amplitude !== 'undefined') {
+                amplitude.track('Booking Step Completed', {
+                    step: 1,
+                    step_name: 'Customer Details',
+                    plant_count: plantCount
+                });
+            }
+
             goToStep(2);
         }
 
@@ -886,6 +916,15 @@
         async function loadAvailableSlots() {
             const pincode = bookingData.pincode;
             const btn = document.getElementById('continueBtn');
+
+            // Track step completion in Amplitude
+            if (typeof amplitude !== 'undefined') {
+                amplitude.track('Booking Step Completed', {
+                    step: 2,
+                    step_name: 'Address',
+                    pincode: pincode
+                });
+            }
 
             goToStep(3);
             document.getElementById('slotsLoading').style.display = 'block';
@@ -1110,6 +1149,16 @@
             bookingData.timeSlot = timeObj.time;
             bookingData.availabilityRowIndex = timeObj.rowIndex;
             document.getElementById('confirmBookingBtn').disabled = false;
+
+            // Track time slot selection in Amplitude
+            if (typeof amplitude !== 'undefined') {
+                amplitude.track('Booking Step Completed', {
+                    step: 3,
+                    step_name: 'Time Slot',
+                    time_slot: timeObj.time,
+                    date: bookingData.dateFormatted
+                });
+            }
         }
 
         async function submitBooking() {
@@ -1150,6 +1199,17 @@
         }
 
         function showSuccess(booking) {
+            // Track Booking Completed in Amplitude
+            if (typeof amplitude !== 'undefined') {
+                amplitude.track('Booking Completed', {
+                    booking_id: booking.bookingID,
+                    plant_count: bookingData.plantCount,
+                    date: bookingData.dateFormatted,
+                    time_slot: bookingData.timeSlot,
+                    pincode: bookingData.pincode
+                });
+            }
+
             // Track Lead event in Meta Pixel
             if (typeof fbq === 'function') {
                 fbq('track', 'Lead', {

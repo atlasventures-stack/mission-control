@@ -1,6 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Amplitude Analytics -->
+    <script src="https://cdn.amplitude.com/script/17abf777767237620e6398f575a1fff4.js"></script>
+    <script>
+        window.amplitude.add(window.sessionReplay.plugin({sampleRate: 1}));
+        window.amplitude.init('17abf777767237620e6398f575a1fff4', {
+            "fetchRemoteConfig": true,
+            "autocapture": {
+                "attribution": true,
+                "fileDownloads": true,
+                "formInteractions": true,
+                "pageViews": true,
+                "sessions": true,
+                "elementInteractions": true,
+                "networkTracking": true,
+                "webVitals": true,
+                "frustrationInteractions": true
+            }
+        });
+    </script>
+    <!-- End Amplitude Analytics -->
+
     <!-- Meta Pixel Code -->
     <script>
     !function(f,b,e,v,n,t,s)
@@ -608,10 +629,26 @@
             document.getElementById('bookingCTA').href = 'booking.html?plants=' + encodeURIComponent(selectedTier.label);
             initPlantSelector(); // Re-render to update selection
             closePlantSelector();
+
+            // Track tier selection in Amplitude
+            if (typeof amplitude !== 'undefined') {
+                amplitude.track('Plant Tier Selected', {
+                    plants: selectedTier.label,
+                    price: selectedTier.value
+                });
+            }
         }
 
         // Track Book Visit click
         function trackBookVisit() {
+            // Amplitude
+            if (typeof amplitude !== 'undefined') {
+                amplitude.track('Booking Started', {
+                    plants: selectedTier.label,
+                    price: selectedTier.value,
+                    source: 'home'
+                });
+            }
             // Google Analytics
             if (typeof gtag !== 'undefined') {
                 gtag('event', 'click_book_visit', {
@@ -722,6 +759,10 @@
         });
 
         function openWhatsApp() {
+            // Amplitude
+            if (typeof amplitude !== 'undefined') {
+                amplitude.track('WhatsApp Clicked', { page: 'home' });
+            }
             trackEvent('click_whatsapp', {page: 'home'});
             window.open('https://wa.me/919187446496', '_blank');
         }
