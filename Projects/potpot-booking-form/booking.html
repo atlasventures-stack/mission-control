@@ -56,6 +56,10 @@
         // Track booking page load
         window.addEventListener('load', function() {
             trackEvent('booking_page_load');
+            // Amplitude
+            if (typeof amplitude !== 'undefined') {
+                amplitude.track('Landed Booking');
+            }
         });
     </script>
     <!-- End Google Analytics -->
