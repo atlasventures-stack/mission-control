@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Facebook Domain Verification -->
+    <meta name="facebook-domain-verification" content="jdb45z001gvkh9107rflqe82lrlpje" />
+
     <!-- Amplitude Analytics -->
     <script src="https://cdn.amplitude.com/script/17abf777767237620e6398f575a1fff4.js"></script>
     <script>
@@ -627,17 +630,35 @@
             }
             // Meta Pixel - Custom event
             if (typeof fbq !== 'undefined') {
-                fbq('trackCustom', 'click_book_visit', {
-                    page: 'home',
-                    plants: selectedTier.label,
-                    price: selectedTier.value
-                });
+                try {
+                    fbq('trackCustom', 'click_book_visit', {
+                        page: 'home',
+                        plants: selectedTier.label,
+                        price: selectedTier.value
+                    });
+                    if (typeof amplitude !== 'undefined') {
+                        amplitude.track('Meta Event', { action: 'click_book_visit', status: 'sent' });
+                    }
+                } catch (e) {
+                    if (typeof amplitude !== 'undefined') {
+                        amplitude.track('Meta Event', { action: 'click_book_visit', status: 'failed', error: e.message });
+                    }
+                }
                 // Meta Pixel - Standard InitiateCheckout event
-                fbq('track', 'InitiateCheckout', {
-                    content_name: 'Book Visit',
-                    value: selectedTier.value,
-                    currency: 'INR'
-                });
+                try {
+                    fbq('track', 'InitiateCheckout', {
+                        content_name: 'Book Visit',
+                        value: selectedTier.value,
+                        currency: 'INR'
+                    });
+                    if (typeof amplitude !== 'undefined') {
+                        amplitude.track('Meta Event', { action: 'InitiateCheckout', status: 'sent' });
+                    }
+                } catch (e) {
+                    if (typeof amplitude !== 'undefined') {
+                        amplitude.track('Meta Event', { action: 'InitiateCheckout', status: 'failed', error: e.message });
+                    }
+                }
             }
             console.log('Book Visit tracked:', selectedTier);
         }
