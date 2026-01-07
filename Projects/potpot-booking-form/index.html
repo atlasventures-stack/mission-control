@@ -781,7 +781,9 @@
             closeModal();
         }
 
-        // Video play function
+        // Video tracking
+        let videoStartTime = null;
+
         function playVideo() {
             const video = document.getElementById('heroVideo');
             const playBtn = document.getElementById('playButton');
@@ -789,10 +791,28 @@
             if (video.paused) {
                 video.play();
                 playBtn.classList.add('hidden');
+                videoStartTime = Date.now();
+                // Track video play in Amplitude
+                if (typeof amplitude !== 'undefined') {
+                    amplitude.track('Video Played', { video: 'hero_video' });
+                }
             } else {
                 video.pause();
                 playBtn.classList.remove('hidden');
+                trackVideoPause(video);
             }
+        }
+
+        function trackVideoPause(video) {
+            if (videoStartTime && typeof amplitude !== 'undefined') {
+                const watchDuration = Math.round((Date.now() - videoStartTime) / 1000);
+                amplitude.track('Video Paused', {
+                    video: 'hero_video',
+                    watch_duration_seconds: watchDuration,
+                    video_current_time: Math.round(video.currentTime)
+                });
+            }
+            videoStartTime = null;
         }
 
         // Show play button when video ends or is paused
@@ -808,6 +828,16 @@
 
             video.addEventListener('ended', function() {
                 playBtn.classList.remove('hidden');
+                // Track video completed
+                if (videoStartTime && typeof amplitude !== 'undefined') {
+                    const watchDuration = Math.round((Date.now() - videoStartTime) / 1000);
+                    amplitude.track('Video Completed', {
+                        video: 'hero_video',
+                        watch_duration_seconds: watchDuration,
+                        video_duration: Math.round(video.duration)
+                    });
+                    videoStartTime = null;
+                }
             });
         });
     </script>
