@@ -521,6 +521,10 @@
             border-radius: 0;
             padding: 20px;
         }
+
+        body.embed-mode #plantCountGroup {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -545,7 +549,7 @@
                     <input type="tel" id="customerPhone" placeholder="10-digit number">
                 </div>
 
-                <div class="form-group">
+                <div class="form-group" id="plantCountGroup">
                     <label for="plantCount">Number of Plants</label>
                     <select id="plantCount">
                         <option value="">Select range</option>
@@ -836,7 +840,9 @@
                 return;
             }
 
-            if (!plantCount) {
+            // Only validate plant count if the field is visible (not in embed mode)
+            const plantCountGroup = document.getElementById('plantCountGroup');
+            if (plantCountGroup && plantCountGroup.offsetParent !== null && !plantCount) {
                 alert('Please select the number of plants');
                 return;
             }
