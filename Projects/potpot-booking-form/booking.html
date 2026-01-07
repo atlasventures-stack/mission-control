@@ -525,6 +525,21 @@
         body.embed-mode #plantCountGroup {
             display: none;
         }
+
+        /* Smooth scrolling for keyboard handling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body.embed-mode {
+            min-height: 100%;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        body.embed-mode .card {
+            padding-bottom: 40px;
+        }
     </style>
 </head>
 <body>
@@ -1290,6 +1305,30 @@
                 window.parent.postMessage(message, '*');
             }
         }
+
+        // Handle keyboard visibility for mobile
+        (function() {
+            // Scroll focused input into view
+            document.addEventListener('focusin', function(e) {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                    setTimeout(function() {
+                        e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 300);
+                }
+            });
+
+            // Use visualViewport API if available (modern approach)
+            if (window.visualViewport) {
+                window.visualViewport.addEventListener('resize', function() {
+                    const activeElement = document.activeElement;
+                    if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
+                        setTimeout(function() {
+                            activeElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }, 100);
+                    }
+                });
+            }
+        })();
     </script>
 </body>
 </html>
