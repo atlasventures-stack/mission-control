@@ -823,6 +823,11 @@
             if (stepEvents[step]) {
                 trackEvent(stepEvents[step]);
             }
+
+            // Notify parent window to resize bottom sheet (for embed mode)
+            if (window.parent !== window) {
+                window.parent.postMessage({ type: 'stepChange', step: step }, '*');
+            }
         }
 
         function validateDetailsAndContinue() {

@@ -718,11 +718,29 @@
             }, 300);
         }
 
-        // Listen for booking completion from iframe
+        // Listen for messages from iframe
         window.addEventListener('message', function(event) {
             if (event.data === 'bookingComplete') {
                 // Optionally close sheet or show success message
                 // closeBookingSheet();
+            }
+
+            // Handle step changes to resize bottom sheet
+            if (event.data && event.data.type === 'stepChange') {
+                const bottomSheet = document.getElementById('bottomSheetContent');
+                const iframeContainer = bottomSheet.querySelector('div[style*="height"]');
+
+                if (event.data.step === 1) {
+                    // Step 1 (details) - smaller sheet
+                    bottomSheet.style.height = '55vh';
+                    bottomSheet.style.maxHeight = '55vh';
+                    iframeContainer.style.height = 'calc(55vh - 50px)';
+                } else {
+                    // Steps 2, 3, 4 (address, calendar, success) - larger sheet
+                    bottomSheet.style.height = '90vh';
+                    bottomSheet.style.maxHeight = '90vh';
+                    iframeContainer.style.height = 'calc(90vh - 50px)';
+                }
             }
         });
 
