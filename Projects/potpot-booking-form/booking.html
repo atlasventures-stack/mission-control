@@ -1177,6 +1177,7 @@
         let map = null;
         let marker = null;
         let geocoder = null;
+        let lastVerifiedPincode = null;
         let slotsMap = {};
 
         const BENGALURU = {
@@ -1244,6 +1245,7 @@
                 document.getElementById('buildingName').value = '';
                 bookingData.pincode = '';
                 bookingData.fullAddress = '';
+                lastVerifiedPincode = null;
                 hideMap();
             });
         }
@@ -1368,18 +1370,24 @@
                 return;
             }
 
-            bookingData.pincode = pincode;
             bookingData.fullAddress = formattedAddress;
             bookingData.mapLink = `https://www.google.com/maps?q=${lat},${lng}`;
             bookingData.lat = lat;
             bookingData.lng = lng;
 
-            // Pre-fill the display (will be shown after serviceability check)
+            // Pre-fill the display
             document.getElementById('selectedAddress').textContent = formattedAddress;
             document.getElementById('selectedPincode').textContent = 'Pincode: ' + pincode;
 
-            // Check serviceability immediately
-            checkServiceability(pincode);
+            // Only check serviceability if pincode changed
+            if (pincode !== lastVerifiedPincode) {
+                bookingData.pincode = pincode;
+                checkServiceability(pincode);
+            } else {
+                // Same pincode, just show form fields (already verified)
+                showMap();
+                document.getElementById('addressFormFields').style.display = 'block';
+            }
         }
 
         async function checkServiceability(pincode) {
@@ -1401,6 +1409,8 @@
                 document.getElementById('serviceabilityLoading').style.display = 'none';
 
                 if (data.valid) {
+                    // Store verified pincode to avoid re-checking on pin drag
+                    lastVerifiedPincode = pincode;
                     // Show map and form fields
                     showMap();
                     document.getElementById('addressFormFields').style.display = 'block';
@@ -1596,6 +1606,7 @@
             bookingData.fullAddress = '';
             bookingData.lat = null;
             bookingData.lng = null;
+            lastVerifiedPincode = null;
 
             // Hide and reset map
             hideMap();
