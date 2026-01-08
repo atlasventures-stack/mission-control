@@ -1379,7 +1379,8 @@
                 document.getElementById('serviceabilityLoading').style.display = 'none';
 
                 if (data.valid) {
-                    // Show form fields
+                    // Show map and form fields
+                    showMap();
                     document.getElementById('addressFormFields').style.display = 'block';
                 } else {
                     // Show "Coming soon" screen
@@ -1391,6 +1392,7 @@
                 console.error('Error checking serviceability:', error);
                 // On error, allow user to continue (fail open)
                 document.getElementById('serviceabilityLoading').style.display = 'none';
+                showMap();
                 document.getElementById('addressFormFields').style.display = 'block';
             }
         }
