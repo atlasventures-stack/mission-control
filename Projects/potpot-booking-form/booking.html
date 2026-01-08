@@ -1394,6 +1394,14 @@
                 } else {
                     // Show "Coming soon" screen
                     trackEvent('pincode_not_served', {pincode: pincode});
+                    if (typeof amplitude !== 'undefined') {
+                        amplitude.track('Area Not Serviceable', {
+                            pincode: pincode,
+                            full_address: bookingData.fullAddress,
+                            lat: bookingData.lat,
+                            lng: bookingData.lng
+                        });
+                    }
                     document.getElementById('step1Content').style.display = 'none';
                     document.getElementById('pincodeError').style.display = 'block';
                 }
