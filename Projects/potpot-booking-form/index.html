@@ -518,7 +518,7 @@
                 <div class="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity" onclick="closeBookingSheet()"></div>
 
                 <!-- Bottom Sheet Content -->
-                <div id="bottomSheetContent" class="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-2xl transform translate-y-full transition-transform duration-300 ease-out" style="height: 55vh; max-height: 55vh;">
+                <div id="bottomSheetContent" class="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-2xl transform translate-y-full transition-transform duration-300 ease-out" style="height: 90vh; max-height: 90vh;">
                     <!-- Handle Bar -->
                     <div class="flex justify-center pt-3 pb-2">
                         <div class="w-10 h-1 bg-gray-300 rounded-full"></div>
@@ -535,7 +535,7 @@
                     </button>
 
                     <!-- Iframe Container -->
-                    <div class="w-full h-full overflow-hidden" style="height: calc(55vh - 50px);">
+                    <div class="w-full h-full overflow-hidden" style="height: calc(90vh - 50px);">
                         <iframe
                             id="bookingIframe"
                             src=""
@@ -555,9 +555,9 @@
             { label: "0-20", value: 399, original: 699, discount: 43 },
             { label: "20-35", value: 599, original: 999, discount: 40 },
             { label: "35-50", value: 799, original: 1499, discount: 47 },
-            { label: "50-75", value: 1199, original: 1999, discount: 40 },
-            { label: "75-100", value: 1499, original: 2499, discount: 40 },
-            { label: "100-150", value: 1999, original: 2999, discount: 33 },
+            { label: "50-75", value: 999, original: 1999, discount: 50 },
+            { label: "75-100", value: 1199, original: 2499, discount: 52 },
+            { label: "100-150", value: 1499, original: 2999, discount: 50 },
         ];
         let selectedTier = pricingTiers[0];
 
@@ -736,24 +736,6 @@
             if (event.data === 'bookingComplete') {
                 // Optionally close sheet or show success message
                 // closeBookingSheet();
-            }
-
-            // Handle step changes to resize bottom sheet
-            if (event.data && event.data.type === 'stepChange') {
-                const bottomSheet = document.getElementById('bottomSheetContent');
-                const iframeContainer = bottomSheet.querySelector('div[style*="height"]');
-
-                if (event.data.step === 1) {
-                    // Step 1 (details) - smaller sheet
-                    bottomSheet.style.height = '55vh';
-                    bottomSheet.style.maxHeight = '55vh';
-                    iframeContainer.style.height = 'calc(55vh - 50px)';
-                } else {
-                    // Steps 2, 3, 4 (address, calendar, success) - larger sheet
-                    bottomSheet.style.height = '90vh';
-                    bottomSheet.style.maxHeight = '90vh';
-                    iframeContainer.style.height = 'calc(90vh - 50px)';
-                }
             }
         });
 
