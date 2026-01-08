@@ -1214,6 +1214,15 @@
                 if (e.key === 'Enter') e.preventDefault();
             });
 
+            // Track when user clicks on address search (only once)
+            let addressSearchTracked = false;
+            input.addEventListener('focus', () => {
+                if (!addressSearchTracked && typeof amplitude !== 'undefined') {
+                    amplitude.track('Address Search Started');
+                    addressSearchTracked = true;
+                }
+            });
+
             input.addEventListener('input', () => {
                 // Hide form fields and loader when user starts typing new address
                 document.getElementById('addressFormFields').style.display = 'none';
