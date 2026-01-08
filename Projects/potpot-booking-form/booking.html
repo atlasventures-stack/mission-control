@@ -1001,15 +1001,24 @@
                 </div>
 
                 <div id="pincodeError" style="display: none;">
-                    <div class="selected-location" style="margin-bottom: 16px;">
-                        <div class="location-text" id="errorAddress">-</div>
-                        <div class="pincode-badge" id="errorPincode">-</div>
+                    <div style="text-align: center; padding: 20px 0;">
+                        <div style="width: 80px; height: 80px; background: #fff3e0; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#f57c00" stroke-width="2">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                                <circle cx="12" cy="10" r="3"/>
+                            </svg>
+                        </div>
+                        <h2 class="step-title" style="margin-bottom: 8px;">We're not here yet!</h2>
+                        <p class="step-subtitle" style="margin-bottom: 20px;">But we're expanding fast and will be in your area soon.</p>
+
+                        <div style="background: #f5f5f5; border-radius: 12px; padding: 16px; margin-bottom: 24px; text-align: left;">
+                            <div style="font-size: 12px; color: #888; margin-bottom: 4px;">Your location</div>
+                            <div style="font-size: 14px; color: #333; margin-bottom: 8px;" id="errorAddress">-</div>
+                            <div style="display: inline-block; background: #264226; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;" id="errorPincode">-</div>
+                        </div>
+
+                        <button class="btn btn-primary" onclick="tryAnotherLocation()">Try Another Location</button>
                     </div>
-                    <div class="message info">
-                        <strong>Coming soon to your area!</strong><br>
-                        We're expanding fast and will be available in your location soon.
-                    </div>
-                    <button class="btn btn-secondary" onclick="tryAnotherLocation()">← Try Another Location</button>
                 </div>
             </div>
 
@@ -1408,7 +1417,7 @@
                     }
                     // Show address in error screen
                     document.getElementById('errorAddress').textContent = bookingData.fullAddress;
-                    document.getElementById('errorPincode').textContent = 'Pincode: ' + pincode;
+                    document.getElementById('errorPincode').textContent = pincode;
                     document.getElementById('step1Content').style.display = 'none';
                     document.getElementById('pincodeError').style.display = 'block';
                 }
