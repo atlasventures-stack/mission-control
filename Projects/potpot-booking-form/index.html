@@ -151,26 +151,18 @@
                 <!-- Top Section: Video/Image Container -->
                 <div class="w-full px-4 pt-5 pb-0 flex flex-col items-center justify-center bg-white">
                     <div class="w-full aspect-video rounded-[24px] overflow-hidden shadow-lg shadow-earth-900/5 relative transform translate-z-0 bg-earth-100 ring-1 ring-earth-900/5">
-                        <!-- Hero Video -->
+                        <!-- Hero Video - Plant Transformation (Muted Autoplay) -->
                         <div class="relative w-full h-full bg-earth-100 overflow-hidden group">
                             <div class="absolute inset-0 w-full h-full">
                                 <video
                                     id="heroVideo"
-                                    src="video-new.mp4"
-                                    poster="thumbnail.png"
+                                    src="transformation.mp4"
                                     class="w-full h-full object-cover opacity-90 transition-transform duration-700 group-hover:scale-105"
                                     loop
                                     playsinline
-                                    onclick="playVideo()"
+                                    autoplay
+                                    muted
                                 ></video>
-                                <!-- Play Button Overlay -->
-                                <div id="playButton" onclick="playVideo()" class="absolute inset-0 flex items-center justify-center cursor-pointer">
-                                    <div class="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center shadow-lg shadow-black/20 transition-transform hover:scale-110">
-                                        <svg class="w-7 h-7 text-earth-700 ml-1" viewBox="0 0 24 24" fill="currentColor">
-                                            <path d="M8 5v14l11-7z"/>
-                                        </svg>
-                                    </div>
-                                </div>
                             </div>
 
                             <!-- Gradient Overlay -->
@@ -781,64 +773,9 @@
             closeModal();
         }
 
-        // Video tracking
-        let videoStartTime = null;
-
-        function playVideo() {
-            const video = document.getElementById('heroVideo');
-            const playBtn = document.getElementById('playButton');
-
-            if (video.paused) {
-                video.play();
-                playBtn.classList.add('hidden');
-                videoStartTime = Date.now();
-                // Track video play in Amplitude
-                if (typeof amplitude !== 'undefined') {
-                    amplitude.track('Video Played', { video: 'hero_video' });
-                }
-            } else {
-                video.pause();
-                playBtn.classList.remove('hidden');
-                trackVideoPause(video);
-            }
-        }
-
-        function trackVideoPause(video) {
-            if (videoStartTime && typeof amplitude !== 'undefined') {
-                const watchDuration = Math.round((Date.now() - videoStartTime) / 1000);
-                amplitude.track('Video Paused', {
-                    video: 'hero_video',
-                    watch_duration_seconds: watchDuration,
-                    video_current_time: Math.round(video.currentTime)
-                });
-            }
-            videoStartTime = null;
-        }
-
-        // Show play button when video ends or is paused
+        // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
             initPlantSelector();
-
-            const video = document.getElementById('heroVideo');
-            const playBtn = document.getElementById('playButton');
-
-            video.addEventListener('pause', function() {
-                playBtn.classList.remove('hidden');
-            });
-
-            video.addEventListener('ended', function() {
-                playBtn.classList.remove('hidden');
-                // Track video completed
-                if (videoStartTime && typeof amplitude !== 'undefined') {
-                    const watchDuration = Math.round((Date.now() - videoStartTime) / 1000);
-                    amplitude.track('Video Completed', {
-                        video: 'hero_video',
-                        watch_duration_seconds: watchDuration,
-                        video_duration: Math.round(video.duration)
-                    });
-                    videoStartTime = null;
-                }
-            });
         });
     </script>
 </body>
