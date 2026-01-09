@@ -737,6 +737,29 @@
                 // Optionally close sheet or show success message
                 // closeBookingSheet();
             }
+
+            // Handle Lead event from iframe (for proper Meta Pixel attribution)
+            if (event.data && event.data.type === 'fireLeadEvent') {
+                if (typeof fbq !== 'undefined') {
+                    try {
+                        fbq('track', 'Lead', {
+                            content_name: 'Plant Care Booking',
+                            content_category: 'Booking Confirmation',
+                            booking_id: event.data.data?.booking_id,
+                            plant_count: event.data.data?.plant_count
+                        });
+                        console.log('Lead event fired from parent window');
+                        if (typeof amplitude !== 'undefined') {
+                            amplitude.track('Meta Event', { action: 'Lead', status: 'fired_from_parent', source: 'iframe_message' });
+                        }
+                    } catch (e) {
+                        console.error('Error firing Lead event:', e);
+                        if (typeof amplitude !== 'undefined') {
+                            amplitude.track('Meta Event', { action: 'Lead', status: 'parent_fire_failed', error: e.message });
+                        }
+                    }
+                }
+            }
         });
 
         function openWhatsApp() {

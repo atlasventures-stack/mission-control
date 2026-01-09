@@ -870,6 +870,38 @@
             background: #e3ebe3;
         }
 
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: #264226;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 20px rgba(38, 66, 38, 0.3);
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .toast svg {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+        }
+
         /* Embed mode styles */
         body.embed-mode {
             background: white;
@@ -908,9 +940,127 @@
         body.embed-mode .card {
             padding-bottom: 40px;
         }
+
+        /* Desktop/Web Responsive Styles */
+        @media (min-width: 768px) {
+            body {
+                padding: 40px 20px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .container {
+                max-width: 560px;
+                width: 100%;
+            }
+
+            .header {
+                margin-bottom: 24px;
+            }
+
+            .header h1 {
+                font-size: 28px;
+            }
+
+            .card {
+                padding: 32px 40px;
+                border-radius: 20px;
+                box-shadow: 0 8px 40px rgba(0,0,0,0.12);
+            }
+
+            .step-title {
+                font-size: 26px;
+            }
+
+            .step-subtitle {
+                font-size: 15px;
+            }
+
+            .form-group {
+                margin-bottom: 20px;
+            }
+
+            input, select {
+                padding: 16px !important;
+                font-size: 16px !important;
+            }
+
+            .btn {
+                padding: 16px 24px;
+                font-size: 16px;
+            }
+
+            .map-wrapper {
+                height: 250px !important;
+            }
+
+            .time-grid {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+
+            .booking-summary {
+                padding: 20px;
+            }
+
+            .loading {
+                padding: 80px 40px;
+            }
+
+            .loading-icon {
+                width: 90px;
+                height: 90px;
+            }
+
+            .loading h3 {
+                font-size: 24px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .container {
+                max-width: 640px;
+            }
+
+            .card {
+                padding: 40px 56px;
+            }
+
+            .step-title {
+                font-size: 28px;
+            }
+
+            .map-wrapper {
+                height: 300px !important;
+            }
+
+            .time-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .date-strip {
+                gap: 12px;
+            }
+
+            .date-item {
+                min-width: 64px;
+                height: 80px;
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- Toast notification -->
+    <div id="toast" class="toast">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+        <span id="toastMessage">We're live in your area!</span>
+    </div>
+
     <div class="container">
         <div class="header">
             <div class="logo">🪴</div>
@@ -986,13 +1136,8 @@
 
                         <div id="addressDetailsFields">
                             <div class="form-group">
-                                <label for="houseNumber">House / Flat Number</label>
-                                <input type="text" id="houseNumber" placeholder="e.g. 101, A-502">
-                            </div>
-
-                            <div class="form-group">
-                                <label for="buildingName">Building / Apartment Name (Optional)</label>
-                                <input type="text" id="buildingName" placeholder="e.g. Prestige Towers">
+                                <label for="houseNumber">Flat No., Building Name</label>
+                                <input type="text" id="houseNumber" placeholder="e.g. A-502, Prestige Towers">
                             </div>
                         </div>
 
@@ -1185,6 +1330,18 @@
             lng: 77.5946
         };
 
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            toastMessage.textContent = message;
+            toast.classList.add('show');
+
+            // Hide after 3 seconds
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
         function initAutocomplete() {
             geocoder = new google.maps.Geocoder();
 
@@ -1242,7 +1399,6 @@
                 document.getElementById('addressFormFields').style.display = 'none';
                 document.getElementById('serviceabilityLoading').style.display = 'none';
                 document.getElementById('houseNumber').value = '';
-                document.getElementById('buildingName').value = '';
                 bookingData.pincode = '';
                 bookingData.fullAddress = '';
                 lastVerifiedPincode = null;
@@ -1288,8 +1444,17 @@
             const btnText = document.getElementById('locationBtnText');
 
             if (!navigator.geolocation) {
+                // Track unsupported
+                if (typeof amplitude !== 'undefined') {
+                    amplitude.track('Live Location Error', { error: 'not_supported' });
+                }
                 alert('Location is not supported by your browser');
                 return;
+            }
+
+            // Track attempt
+            if (typeof amplitude !== 'undefined') {
+                amplitude.track('Live Location Attempted');
             }
 
             // Update button state
@@ -1300,6 +1465,11 @@
                 (position) => {
                     const lat = position.coords.latitude;
                     const lng = position.coords.longitude;
+
+                    // Track success
+                    if (typeof amplitude !== 'undefined') {
+                        amplitude.track('Live Location Success', { lat, lng });
+                    }
 
                     // Show map and center on user's location
                     showMap();
@@ -1313,36 +1483,45 @@
                     // Reset button
                     btn.disabled = false;
                     btnText.textContent = 'Use My Current Location';
-
-                    // Track in Amplitude
-                    if (typeof amplitude !== 'undefined') {
-                        amplitude.track('Live Location Used', { lat, lng });
-                    }
                 },
                 (error) => {
                     btn.disabled = false;
                     btnText.textContent = 'Use My Current Location';
 
+                    let errorType = 'unknown';
                     let message = 'Unable to get your location. ';
                     switch(error.code) {
                         case error.PERMISSION_DENIED:
+                            errorType = 'permission_denied';
                             message += 'Please allow location access in your browser settings.';
                             break;
                         case error.POSITION_UNAVAILABLE:
+                            errorType = 'position_unavailable';
                             message += 'Location information is unavailable.';
                             break;
                         case error.TIMEOUT:
+                            errorType = 'timeout';
                             message += 'Request timed out. Please try again.';
                             break;
                         default:
                             message += 'Please search manually.';
                     }
+
+                    // Track error
+                    if (typeof amplitude !== 'undefined') {
+                        amplitude.track('Live Location Error', {
+                            error: errorType,
+                            code: error.code,
+                            message: error.message
+                        });
+                    }
+
                     alert(message);
                 },
                 {
-                    enableHighAccuracy: true,
-                    timeout: 10000,
-                    maximumAge: 0
+                    enableHighAccuracy: false,  // Use network location first (faster on iOS)
+                    timeout: 15000,  // Increased timeout for iOS
+                    maximumAge: 60000  // Accept cached location up to 1 minute old
                 }
             );
         }
@@ -1352,6 +1531,19 @@
                 if (status === 'OK' && results[0]) {
                     showMap();
                     updateAddressFromComponents(results[0].address_components, results[0].formatted_address, lat, lng);
+                } else {
+                    // Geocoding failed - still show map with form fields
+                    console.error('Reverse geocode failed:', status);
+                    if (typeof amplitude !== 'undefined') {
+                        amplitude.track('Reverse Geocode Failed', { status, lat, lng });
+                    }
+                    showMap();
+                    document.getElementById('addressFormFields').style.display = 'block';
+                    document.getElementById('selectedAddress').textContent = `Location: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+                    document.getElementById('selectedPincode').textContent = 'Drag pin to get address';
+                    bookingData.lat = lat;
+                    bookingData.lng = lng;
+                    bookingData.mapLink = `https://www.google.com/maps?q=${lat},${lng}`;
                 }
             });
         }
@@ -1366,7 +1558,12 @@
             }
 
             if (!pincode) {
-                alert('Could not detect pincode. Please drag the pin to a more specific location.');
+                // Pincode not found - still show form fields, will validate later
+                console.warn('Pincode not detected from address');
+                showMap();
+                document.getElementById('addressFormFields').style.display = 'block';
+                document.getElementById('selectedAddress').textContent = formattedAddress;
+                document.getElementById('selectedPincode').textContent = 'Pincode not detected - drag pin to adjust';
                 return;
             }
 
@@ -1374,6 +1571,16 @@
             bookingData.mapLink = `https://www.google.com/maps?q=${lat},${lng}`;
             bookingData.lat = lat;
             bookingData.lng = lng;
+
+            // Track address entered in Amplitude
+            if (typeof amplitude !== 'undefined') {
+                amplitude.track('Address Entered', {
+                    address: formattedAddress,
+                    pincode: pincode,
+                    lat: lat,
+                    lng: lng
+                });
+            }
 
             // Pre-fill the display
             document.getElementById('selectedAddress').textContent = formattedAddress;
@@ -1414,6 +1621,8 @@
                     // Show map and form fields
                     showMap();
                     document.getElementById('addressFormFields').style.display = 'block';
+                    // Show success toast
+                    showToast("We're live in your area! 🎉");
                 } else {
                     // Show "Coming soon" screen
                     trackEvent('pincode_not_served', {pincode: pincode});
@@ -1448,12 +1657,8 @@
                 return;
             }
 
-            // Build full address
-            const buildingName = document.getElementById('buildingName').value.trim();
-            let completeAddress = '';
-            if (houseNumber) completeAddress += houseNumber + ', ';
-            if (buildingName) completeAddress += buildingName + ', ';
-            completeAddress += bookingData.fullAddress;
+            // Build full address (house number already includes building name)
+            let completeAddress = houseNumber + ', ' + bookingData.fullAddress;
             bookingData.fullAddress = completeAddress;
 
             // Load available slots directly (pincode already validated)
@@ -1601,7 +1806,6 @@
             // Clear the address fields
             document.getElementById('addressSearch').value = '';
             document.getElementById('houseNumber').value = '';
-            document.getElementById('buildingName').value = '';
             bookingData.pincode = '';
             bookingData.fullAddress = '';
             bookingData.lat = null;
@@ -1942,19 +2146,38 @@
                 });
             }
 
-            // Track Lead event in Meta Pixel
-            if (typeof fbq === 'function') {
-                try {
-                    fbq('track', 'Lead', {
-                        content_name: 'Plant Care Booking',
-                        content_category: 'Booking Confirmation'
-                    });
-                    if (typeof amplitude !== 'undefined') {
-                        amplitude.track('Meta Event', { action: 'Lead', status: 'sent' });
+            // Track Lead event - send to parent window if in iframe (for proper attribution)
+            // or fire directly if not in iframe
+            const isInIframe = window.self !== window.top;
+
+            if (isInIframe) {
+                // Send message to parent to fire Lead event (maintains fbclid attribution)
+                window.parent.postMessage({
+                    type: 'fireLeadEvent',
+                    data: {
+                        booking_id: booking.bookingID,
+                        plant_count: bookingData.plantCount,
+                        pincode: bookingData.pincode
                     }
-                } catch (e) {
-                    if (typeof amplitude !== 'undefined') {
-                        amplitude.track('Meta Event', { action: 'Lead', status: 'failed', error: e.message });
+                }, '*');
+                if (typeof amplitude !== 'undefined') {
+                    amplitude.track('Meta Event', { action: 'Lead', status: 'sent_to_parent' });
+                }
+            } else {
+                // Fire directly if not in iframe
+                if (typeof fbq === 'function') {
+                    try {
+                        fbq('track', 'Lead', {
+                            content_name: 'Plant Care Booking',
+                            content_category: 'Booking Confirmation'
+                        });
+                        if (typeof amplitude !== 'undefined') {
+                            amplitude.track('Meta Event', { action: 'Lead', status: 'sent' });
+                        }
+                    } catch (e) {
+                        if (typeof amplitude !== 'undefined') {
+                            amplitude.track('Meta Event', { action: 'Lead', status: 'failed', error: e.message });
+                        }
                     }
                 }
             }
